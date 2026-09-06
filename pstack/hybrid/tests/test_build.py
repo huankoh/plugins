@@ -26,6 +26,18 @@ class BuildTests(unittest.TestCase):
                 self.assertEqual({p.parent.name for p in (target / 'skills').glob('*/SKILL.md')}, original)
                 self.assertTrue((target / 'hybrid/runner.py').exists())
                 self.assertTrue((target / 'LICENSE').exists())
+            marketplace_path = output / 'cursor/.cursor-plugin/marketplace.json'
+            marketplace = json.loads(marketplace_path.read_text())
+            self.assertEqual(marketplace['name'], 'hstack')
+            self.assertEqual(marketplace['owner']['name'], 'huankoh')
+            self.assertEqual(len(marketplace['plugins']), 1)
+            entry = marketplace['plugins'][0]
+            self.assertEqual(entry['source'], './plugins/hstack')
+            plugin_root = (marketplace_path.parent.parent / entry['source']).resolve()
+            self.assertEqual(plugin_root, (output / 'cursor/plugins/hstack').resolve())
+            manifest = json.loads((plugin_root / '.cursor-plugin/plugin.json').read_text())
+            self.assertEqual(entry['name'], manifest['name'])
+            self.assertEqual(entry['name'], 'hstack')
             cursor = output / 'cursor/plugins/hstack/skills/poteto-mode/SKILL.md'
             codex = output / 'codex/plugins/hstack/skills/poteto-mode/SKILL.md'
             self.assertIn('disable-model-invocation', cursor.read_text().split('---')[1])

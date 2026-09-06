@@ -78,6 +78,13 @@ def build(output):
             manifest = dict(upstream, name=NAME, displayName='hstack', repository='https://github.com/huankoh/plugins',
                             version=upstream['version'] + '+hstack.' + fingerprint[:12])
             folder = target / '.cursor-plugin'
+            marketplace = output / runtime / '.cursor-plugin'
+            marketplace.mkdir(parents=True)
+            (marketplace / 'marketplace.json').write_text(json.dumps({
+                'name': NAME, 'owner': {'name': 'huankoh'},
+                'plugins': [{'name': NAME, 'source': './plugins/' + NAME,
+                             'description': 'hstack: pstack workflows with Codex review and rescue.'}]
+            }, indent=2) + '\n')
         folder.mkdir(exist_ok=True)
         (folder / 'plugin.json').write_text(json.dumps(manifest, indent=2) + '\n')
         (target / 'BUILD.json').write_text(json.dumps({'runtime': runtime, 'source_revision': revision,

@@ -8,13 +8,13 @@ After reviewing the adaptation PR, clone `https://github.com/huankoh/plugins.git
 python3 -m venv .venv
 .venv/bin/pip install -r pstack/hybrid/requirements.txt
 .venv/bin/python pstack/hybrid/build.py
-mkdir -p ~/.cursor/plugins/local
-ln -s "$PWD/dist/hstack/cursor/plugins/hstack" ~/.cursor/plugins/local/hstack
 ```
 
-If that symlink already exists, inspect its target before deliberately updating it. Reload Cursor and check that the local `hstack` package is visible. Use its `poteto-mode` skill, explicitly selecting the fork's package rather than another pstack installation. Ask the agent to read `BUILD.json` and report its fingerprint.
+In Cursor, open **Customize → Plugins → Add → From Local Repository** and select the clone's **`dist/hstack/cursor`** directory. This is the generated marketplace root: it contains `.cursor-plugin/marketplace.json`, which points to `./plugins/hstack`. Selecting the plugin subdirectory itself produces a missing-marketplace error in this import flow. Choose **hstack** from the imported marketplace and install it.
 
-Cursor discovers local plugins only when local imports are allowed. On managed accounts, an admin may control this. A marketplace package with the same name takes precedence over a local copy, hence the distinct package name. See [Cursor plugins](https://cursor.com/docs/plugins).
+Confirm hstack and its skills appear in Customize. Use its `poteto-mode` skill, explicitly selecting the fork's package rather than another pstack installation. Ask the agent to read the package's `BUILD.json` and report its fingerprint.
+
+Cursor also documents `~/.cursor/plugins/local/hstack` symlinks for plugin development, but that discovery path did not expose hstack in the tested Agents UI after reload. Use the marketplace import above for this setup. On managed accounts, an admin may control local imports. See [Cursor plugins](https://cursor.com/docs/plugins) and [marketplace structure](https://cursor.com/docs/reference/plugins#cursor-multi-plugin-repositories).
 
 ## Prepare Codex
 
