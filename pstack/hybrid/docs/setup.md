@@ -1,4 +1,4 @@
-# Choose the execution location
+# Choose the hstack execution location
 
 | Location | Who starts Codex | Code and results live on | Subscription login |
 |---|---|---|---|

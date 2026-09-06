@@ -1,9 +1,9 @@
-name: pstack hybrid
+name: hstack
 on:
   push:
     branches: [feat/pstack-codex-support]
   pull_request:
-    paths: ['pstack/**', '.github/workflows/pstack-hybrid.yml']
+    paths: ['pstack/**', '.github/workflows/hstack.yml']
 permissions:
   contents: read
 jobs:

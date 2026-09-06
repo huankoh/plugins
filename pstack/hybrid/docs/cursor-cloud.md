@@ -1,4 +1,4 @@
-# Codex preinstalled in Cursor cloud VMs
+# hstack with Codex preinstalled in Cursor cloud VMs
 
 ## Build the environment
 
@@ -21,8 +21,8 @@ Both must report the pinned CLI version. Existing agents or explicitly selected 
 The Build contains the executable, not a subscription login. Inside the VM where Codex will actually run:
 
 ```bash
-export PSTACK_CODEX_BINARY="$HOME/.local/share/pstack-codex/node_modules/.bin/codex"
-"$PSTACK_CODEX_BINARY" login --device-auth
+export HSTACK_CODEX_BINARY="$HOME/.local/share/hstack-codex/node_modules/.bin/codex"
+"$HSTACK_CODEX_BINARY" login --device-auth
 python3 pstack/hybrid/runner.py doctor
 ```
 

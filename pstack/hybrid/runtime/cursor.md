@@ -1,4 +1,4 @@
-# Cursor runtime
+# hstack Cursor runtime
 
 Use this package's sibling skills and named agents. Preserve native Task, model-role rules, cloud lifecycle tools, and Cursor metadata. Do not treat Codex model identifiers as Cursor model identifiers.
 

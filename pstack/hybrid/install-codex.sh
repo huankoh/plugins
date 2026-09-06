@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # Install the CLI only. Never authenticate during an image build.
 set -euo pipefail
-version="${PSTACK_CODEX_VERSION:-0.153.3}"
-prefix="${PSTACK_CODEX_PREFIX:-$HOME/.local/share/pstack-codex}"
+version="${HSTACK_CODEX_VERSION:-0.153.3}"
+prefix="${HSTACK_CODEX_PREFIX:-$HOME/.local/share/hstack-codex}"
 if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-  echo 'PSTACK_CODEX_VERSION must be an exact release version' >&2
+  echo 'HSTACK_CODEX_VERSION must be an exact release version' >&2
   exit 2
 fi
 if [[ -x "$prefix/node_modules/.bin/codex" ]] && [[ "$("$prefix/node_modules/.bin/codex" --version)" == "codex-cli $version" ]]; then

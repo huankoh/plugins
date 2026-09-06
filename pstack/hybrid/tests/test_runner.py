@@ -16,7 +16,7 @@ class RunnerTests(unittest.TestCase):
         self.root = Path(self.temp.name)
         self.repo = self.root / 'repo'
         self.repo.mkdir()
-        self.env = dict(os.environ, PSTACK_CODEX_DATA=str(self.root / 'state'), PSTACK_CODEX_BINARY=str(HYBRID / 'tests/fake_codex.py'))
+        self.env = dict(os.environ, HSTACK_CODEX_DATA=str(self.root / 'state'), HSTACK_CODEX_BINARY=str(HYBRID / 'tests/fake_codex.py'))
         self.git('init', '-q')
         self.git('config', 'user.name', 'Fixture')
         self.git('config', 'user.email', 'fixture@example.invalid')
@@ -131,7 +131,7 @@ class RunnerTests(unittest.TestCase):
         task.write_text('{"prompt":"different"}')
         self.assertIn('different request', self.call('submit', '--repo', str(self.repo), '--base', self.base,
             '--head', self.base, '--key', 'review', '--task', str(task), success=False)['error'])
-        self.env['PSTACK_CODEX_BINARY'] = str(self.root / 'missing')
+        self.env['HSTACK_CODEX_BINARY'] = str(self.root / 'missing')
         self.assertIn('FileNotFoundError', self.call('submit', '--repo', str(self.repo), '--base', self.base,
             '--head', self.base, '--key', 'missing', '--task', str(task), success=False)['error'])
         self.assertEqual(self.call('status', 'missing')['status'], 'interrupted')

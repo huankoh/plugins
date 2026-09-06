@@ -1,14 +1,14 @@
-# Pstack hybrid
+# hstack
 
-Pstack workflows for Cursor and Codex CLI/desktop, plus a subscription-authenticated Codex review/rescue runner. This is an adaptation in [huankoh/plugins](https://github.com/huankoh/plugins), based on Lauren Tan's MIT-licensed pstack. It is not an official Cursor or OpenAI release.
+hstack adapts Lauren Tan's MIT-licensed [pstack](https://github.com/cursor/plugins/tree/main/pstack) for Cursor and Codex CLI/desktop, with a subscription-authenticated Codex review/rescue runner. It is maintained in [huankoh/plugins](https://github.com/huankoh/plugins) and is not an official Cursor or OpenAI release.
 
-The canonical skills remain in `pstack/skills`. `build.py` generates separate `pstack-hybrid` packages with runtime-specific entry instructions and metadata. It does not install anything. The 18 model roles stay separate from execution backend selection. Existing model settings are preserved.
+The canonical upstream skills remain in `pstack/skills`; the adaptation source stays in `pstack/hybrid` to keep upstream comparisons clear. `build.py` generates separate `hstack` packages with runtime-specific entry instructions and metadata. It does not install anything. The 18 model roles stay separate from execution backend selection. Existing model settings are preserved.
 
 ## Start here
 
 - [Setup overview](docs/setup.md): choose where each process runs.
 - [Cursor and local Codex](docs/cursor-local.md): package build, installation and a review.
-- [Codex CLI and desktop](docs/codex.md): use pstack directly in Codex.
+- [Codex CLI and desktop](docs/codex.md): use hstack directly in Codex.
 - [Grok Bot](docs/grok-bot.md): persistent VM setup and a reusable coordinator brief.
 - [Cursor cloud VM](docs/cursor-cloud.md): preinstall the CLI, authenticate and collect results.
 - [Verification record](docs/verification.md): tested behavior and live-host limitations.
@@ -23,7 +23,7 @@ Cursor implementation → checkpoint SHA → Codex read-only review → Cursor f
 Cursor stopped → checkpoint + diagnostics → Codex rescue → patch → Cursor review
 ```
 
-These are coordinator-driven transitions, not an autonomous daemon. The runner enforces identity, checkout isolation and result checks. The coordinator must actually stop the previous writer and select the intended checkpoint. Direct Codex sessions use native pstack workflows without requiring Cursor.
+These are coordinator-driven transitions, not an autonomous daemon. The runner enforces identity, checkout isolation and result checks. The coordinator must actually stop the previous writer and select the intended checkpoint. Direct Codex sessions use hstack's adapted pstack workflows without requiring Cursor.
 
 A `succeeded` process can still have `verification: failed` or `blocked`. A review is acceptable only after `validate` confirms the reviewed SHA is still current. Rescue verification is not independent review.
 
@@ -38,7 +38,7 @@ python3 -m venv .venv
 .venv/bin/python -m unittest discover -s pstack/hybrid/tests -v
 ```
 
-Outputs are under ignored `dist/pstack-hybrid/{cursor,codex}`. Existing source and installed plugins are not modified. Each generated package includes a source revision and content fingerprint in `BUILD.json`.
+Outputs are under ignored `dist/hstack/{cursor,codex}`. Existing source and installed plugins are not modified. Each generated package includes a source revision and content fingerprint in `BUILD.json`.
 
 ## Updates
 

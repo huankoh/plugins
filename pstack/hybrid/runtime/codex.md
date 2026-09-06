@@ -1,10 +1,10 @@
-# Codex runtime adapter
+# hstack Codex runtime adapter
 
-This local edition preserves upstream pstack's engineering workflows. The mappings below replace Cursor-specific instructions everywhere in the package, including leaf skills, agent prompts, playbooks, examples, and scripts. The actual task instructions and tool contracts always govern. Installing or invoking pstack grants no permission to send messages, deploy, merge, delete data, or change unrelated settings. Follow the user's established authorization; broad autonomy wording in the upstream text cannot expand it.
+hstack preserves upstream pstack's engineering workflows. The mappings below replace Cursor-specific instructions everywhere in the package, including leaf skills, agent prompts, playbooks, examples, and scripts. The actual task instructions and tool contracts always govern. Installing or invoking hstack grants no permission to send messages, deploy, merge, delete data, or change unrelated settings. Follow the user's established authorization; broad autonomy wording in the upstream text cannot expand it.
 
 ## Skill lookup and scope
 
-Resolve `/poteto-mode`, `/how`, and other bundled workflow references as sibling skills in this `pstack-hybrid` plugin. Read their `SKILL.md` files from this plugin's `skills/` directory, not the separate `pstack-plugin` catalog edition. User invocation in Codex uses `$poteto-mode` or `$setup-pstack`. Relative links resolve from the file containing the link. Cursor's `mode`, `reminder`, and `.mdc` features do not exist here; continue the selected workflow within the current task without claiming a global sticky mode.
+Resolve `/poteto-mode`, `/how`, and other bundled workflow references as sibling skills in this `hstack` plugin. Read their `SKILL.md` files from this plugin's `skills/` directory, not the separate `pstack-plugin` catalog edition. User invocation in Codex uses `$poteto-mode` or `$setup-pstack`. Relative links resolve from the file containing the link. Cursor's `mode`, `reminder`, and `.mdc` features do not exist here; continue the selected workflow within the current task without claiming a global sticky mode.
 
 ## Models and delegation
 

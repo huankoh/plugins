@@ -1,4 +1,4 @@
-# Hybrid execution policy
+# hstack hybrid execution policy
 
 Execution backend and model selection are independent. Preserve existing role preferences. The CLI runner omits model flags unless the caller explicitly supplies a Codex model. Omitting flags uses the CLI's configured default, which may differ from Cursor's current model.
 

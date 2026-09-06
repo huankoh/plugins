@@ -12,14 +12,14 @@ import yaml
 
 SOURCE = Path(__file__).resolve().parents[1]
 HYBRID = SOURCE / 'hybrid'
-NAME = 'pstack-hybrid'
+NAME = 'hstack'
 
 
 def build(output):
     output = Path(output).resolve()
     if output == SOURCE or SOURCE.is_relative_to(output) or output.is_relative_to(SOURCE):
         raise ValueError('Output must not replace source or live inside canonical skills')
-    marker = output / '.pstack-build'
+    marker = output / '.hstack-build'
     if output.exists() and any(output.iterdir()):
         if not marker.exists():
             raise ValueError('Refusing to replace an unmarked output directory')
@@ -63,20 +63,20 @@ def build(output):
             (target / 'config').mkdir()
             shutil.copy2(HYBRID / 'runtime/default-models.json', target / 'config/default-models.json')
             shutil.copy2(HYBRID / 'runtime/setup-codex.md', target / 'skills/setup-pstack/SKILL.md')
-            manifest = {'name': NAME, 'version': upstream['version'] + '+hybrid.' + fingerprint[:12],
-                        'description': 'Pstack workflows adapted for Codex CLI and desktop, with optional hybrid execution.',
+            manifest = {'name': NAME, 'version': upstream['version'] + '+hstack.' + fingerprint[:12],
+                        'description': 'hstack: pstack workflows for Codex CLI and desktop, with optional hybrid execution.',
                         'author': upstream['author'], 'license': 'MIT', 'repository': 'https://github.com/huankoh/plugins',
-                        'skills': './skills/', 'interface': {'displayName': 'pstack hybrid', 'shortDescription': 'Pstack for Cursor and Codex', 'longDescription': 'All pstack workflows adapted for Codex CLI and desktop with optional hybrid review and rescue.', 'developerName': 'huankoh, based on Lauren Tan’s pstack', 'category': 'Productivity', 'capabilities': [], 'defaultPrompt': 'Use $poteto-mode for this engineering task.'}}
+                        'skills': './skills/', 'interface': {'displayName': 'hstack', 'shortDescription': 'hstack for Cursor and Codex', 'longDescription': 'All pstack workflows adapted for Codex CLI and desktop with optional hybrid review and rescue.', 'developerName': 'huankoh, based on Lauren Tan’s pstack', 'category': 'Productivity', 'capabilities': [], 'defaultPrompt': 'Use $poteto-mode for this engineering task.'}}
             folder = target / '.codex-plugin'
             marketplace = output / runtime / '.agents/plugins'
             marketplace.mkdir(parents=True)
             # Relative to the marketplace root, not the manifest's containing directory.
-            (marketplace / 'marketplace.json').write_text(json.dumps({'name': 'pstack-hybrid', 'plugins': [{
+            (marketplace / 'marketplace.json').write_text(json.dumps({'name': 'hstack', 'plugins': [{
                 'name': NAME, 'source': {'source': 'local', 'path': './plugins/' + NAME},
                 'policy': {'installation': 'AVAILABLE', 'authentication': 'ON_INSTALL'}, 'category': 'Productivity'}]}, indent=2) + '\n')
         else:
-            manifest = dict(upstream, name=NAME, displayName='pstack hybrid', repository='https://github.com/huankoh/plugins',
-                            version=upstream['version'] + '+hybrid.' + fingerprint[:12])
+            manifest = dict(upstream, name=NAME, displayName='hstack', repository='https://github.com/huankoh/plugins',
+                            version=upstream['version'] + '+hstack.' + fingerprint[:12])
             folder = target / '.cursor-plugin'
         folder.mkdir(exist_ok=True)
         (folder / 'plugin.json').write_text(json.dumps(manifest, indent=2) + '\n')
@@ -87,5 +87,5 @@ def build(output):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--output', type=Path, default=SOURCE.parent / 'dist/pstack-hybrid')
+    parser.add_argument('--output', type=Path, default=SOURCE.parent / 'dist/hstack')
     print(json.dumps(build(parser.parse_args().output), indent=2))

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Process supervision for subscription-authenticated pstack Codex jobs."""
+"""Process supervision for subscription-authenticated hstack Codex jobs."""
 import argparse
 import fcntl
 import hashlib
@@ -14,8 +14,8 @@ import sys
 import time
 import uuid
 
-ROOT = Path(os.environ.get("PSTACK_CODEX_DATA", "~/.local/share/pstack-hybrid")).expanduser().resolve()
-BINARY = os.environ.get("PSTACK_CODEX_BINARY") or shutil.which("codex") or ("/Applications/ChatGPT.app/Contents/Resources/codex" if Path("/Applications/ChatGPT.app/Contents/Resources/codex").exists() else "codex")
+ROOT = Path(os.environ.get("HSTACK_CODEX_DATA", "~/.local/share/hstack")).expanduser().resolve()
+BINARY = os.environ.get("HSTACK_CODEX_BINARY") or shutil.which("codex") or ("/Applications/ChatGPT.app/Contents/Resources/codex" if Path("/Applications/ChatGPT.app/Contents/Resources/codex").exists() else "codex")
 ACTIVE = {"starting", "running", "orphaned"}
 PUBLIC = ("id", "cwd", "model", "effort", "sandbox", "timeout_seconds", "status", "created_at", "finished_at", "exit_code", "error")
 

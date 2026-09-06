@@ -7,7 +7,7 @@ import unittest
 import yaml
 
 HYBRID = Path(__file__).resolve().parents[1]
-spec = importlib.util.spec_from_file_location('pstack_build', HYBRID / 'build.py')
+spec = importlib.util.spec_from_file_location('hstack_build', HYBRID / 'build.py')
 builder = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(builder)
 
@@ -22,22 +22,22 @@ class BuildTests(unittest.TestCase):
             original = {p.parent.name for p in (builder.SOURCE / 'skills').glob('*/SKILL.md')}
             self.assertEqual(len(original), 45)
             for runtime in ('cursor', 'codex'):
-                target = output / runtime / 'plugins/pstack-hybrid'
+                target = output / runtime / 'plugins/hstack'
                 self.assertEqual({p.parent.name for p in (target / 'skills').glob('*/SKILL.md')}, original)
                 self.assertTrue((target / 'hybrid/runner.py').exists())
                 self.assertTrue((target / 'LICENSE').exists())
-            cursor = output / 'cursor/plugins/pstack-hybrid/skills/poteto-mode/SKILL.md'
-            codex = output / 'codex/plugins/pstack-hybrid/skills/poteto-mode/SKILL.md'
+            cursor = output / 'cursor/plugins/hstack/skills/poteto-mode/SKILL.md'
+            codex = output / 'codex/plugins/hstack/skills/poteto-mode/SKILL.md'
             self.assertIn('disable-model-invocation', cursor.read_text().split('---')[1])
             self.assertNotIn('disable-model-invocation', codex.read_text().split('---')[1])
             policy = yaml.safe_load((codex.parent / 'agents/openai.yaml').read_text())
             self.assertFalse(policy['policy']['allow_implicit_invocation'])
-            defaults = json.loads((output / 'codex/plugins/pstack-hybrid/config/default-models.json').read_text())
+            defaults = json.loads((output / 'codex/plugins/hstack/config/default-models.json').read_text())
             self.assertEqual(len(defaults['roles']), 18)
             self.assertEqual(defaults['default'], 'inherit-parent')
             # Cursor's setup remains native; Codex receives its own template.
-            self.assertIn('~/.cursor/rules/pstack-models.mdc', (output / 'cursor/plugins/pstack-hybrid/skills/setup-pstack/SKILL.md').read_text())
-            self.assertIn('~/.codex/pstack-models.json', (output / 'codex/plugins/pstack-hybrid/skills/setup-pstack/SKILL.md').read_text())
+            self.assertIn('~/.cursor/rules/pstack-models.mdc', (output / 'cursor/plugins/hstack/skills/setup-pstack/SKILL.md').read_text())
+            self.assertIn('~/.codex/pstack-models.json', (output / 'codex/plugins/hstack/skills/setup-pstack/SKILL.md').read_text())
 
     def test_build_refuses_source_and_unmarked_directories(self):
         with self.assertRaises(ValueError):
