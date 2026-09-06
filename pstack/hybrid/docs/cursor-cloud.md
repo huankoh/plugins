@@ -103,3 +103,9 @@ Before the VM ends, collect the report, patch and verification logs through the 
 - Worker interrupted: inspect its recorded key and collect artifacts before retrying. A success message without a collected patch/report is incomplete.
 
 The install/start mechanism is documented. Actual nested Codex execution must be verified on your account's environment; it is not guaranteed merely because the binary is present.
+
+## Remote marketplace import probe
+
+The exact tested marketplace was published as [the hstack-cursor distribution branch](https://github.com/huankoh/plugins/tree/hstack-cursor) at commit `0033863ff097f08068f06c73338721715bfeec3e`. It contains the same generated e35ef95 package as the working local installation; adaptation source and review remain on the PR branch.
+
+Importing that `/tree/hstack-cursor` URL through Cursor's **Import from GitHub** UI imported the default-branch marketplace with 65 upstream plugins instead of hstack. The experimental registration was removed without installing any of those plugins. Do not use that branch URL as a verified installation recipe. Native cloud registration remains unresolved; the saved environment's explicit staged-file workflow is the tested cloud mechanism.

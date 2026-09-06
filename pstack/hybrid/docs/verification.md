@@ -120,5 +120,12 @@ authentication was unavailable in the fresh VM, and nested review awaits the
 user's new authentication approval. Neither native hstack cloud discovery nor
 authenticated nested execution is claimed as passed.
 
+A GitHub marketplace experiment published the identical tested package on fork
+branch `hstack-cursor` at `0033863ff097f08068f06c73338721715bfeec3e`. Cursor's
+current import UI ignored the `/tree/hstack-cursor` selection and imported the
+default marketplace instead. That experimental registration was removed; the
+verified local hstack installation remains active. This does not establish
+native hstack cloud registration.
+
 Grok Bot was not configured or tested during these activation checks. Its guide
 remains a deployment procedure awaiting live validation.
