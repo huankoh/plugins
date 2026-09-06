@@ -1,0 +1,5 @@
+{
+  "$schema": "https://cursor.com/schemas/environment.schema.json",
+  "install": "bash pstack/hybrid/install-codex.sh",
+  "start": "bash pstack/hybrid/check-codex.sh"
+}

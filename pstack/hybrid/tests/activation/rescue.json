@@ -1,0 +1,4 @@
+{
+  "prompt": "Repair the reproducible refund-accounting defect in this disposable receipt summary application. The original baseline has four CLI acceptance tests, three failing. Read README.md and preserve the acceptance expectations. Return a bounded patch that makes the application pass the checks. Put only unresolved blocking issues in findings; completion notes belong in summary.",
+  "checks": [["python3", "-m", "unittest", "discover", "-s", "tests", "-v"]]
+}

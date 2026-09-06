@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "summary": {
+      "type": "string"
+    },
+    "verdict": {
+      "type": "string",
+      "enum": [
+        "pass",
+        "fail",
+        "blocked"
+      ]
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Unresolved blocking correctness or verification issues only. Return an empty array when passing; put observations and completed checks in summary."
+    }
+  },
+  "required": [
+    "summary",
+    "verdict",
+    "findings"
+  ],
+  "additionalProperties": false
+}

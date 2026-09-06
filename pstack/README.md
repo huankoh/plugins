@@ -255,3 +255,7 @@ to set it up, point cursor at [`FOR_AGENTS.md`](./automations/benny/FOR_AGENTS.m
 ## license
 
 MIT
+
+## hstack: Cursor and Codex adaptation
+
+This fork adds [hstack](hybrid/README.md), an opt-in distribution based on upstream pstack, with generated Cursor/Codex packages, a Codex review/rescue runner, and setup guides for local Cursor, Grok Bot and Cursor cloud VMs. Canonical upstream skills remain unchanged; runtime-specific instructions are added during packaging.
