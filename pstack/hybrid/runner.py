@@ -94,10 +94,14 @@ def submit(args):
         # handoff remains visible and cannot silently launch a duplicate.
         git(repo, 'worktree', 'add', '--detach', str(checkout), head)
         prompt = ('You are a bounded pstack hybrid worker. Do not delegate to another execution backend. '
-                  'Do not push, merge, or change the source checkout. Return the required JSON report.\n'
+                  'Do not push, merge, or change the source checkout. Return the required JSON report. '
+                  'Findings must contain only unresolved blocking issues; use an empty findings array when passing. Put completed work and evidence in summary.\n'
                   + ('Review only. Do not modify tracked or untracked project files. ' if args.role == 'review' else
                      'Implement only the assigned rescue/implementation. Leave changes in this checkout; do not commit. ')
                   + f'\nOriginal base: {base}\nInput head: {head}\n'
+                  + f'Read the pstack Codex adapter at {Path(__file__).parent / "runtime/codex.md"}. '
+                  + f'Apply the verification principle at {Path(__file__).parent.parent / "skills/principle-prove-it-works/SKILL.md"}. '
+                  + 'Your bounded worker role overrides orchestrator instructions: do not spawn another backend or run the full orchestration loop.\n'
                   + 'Read AGENTS.md and applicable repository instructions. Inspect the diff from original base to input head.\n'
                   + task['prompt'] + '\nAcceptance commands: ' + json.dumps(task.get('checks', [])))
         task_path = directory / 'worker-task.json'
