@@ -1,5 +1,7 @@
 # hstack in Cursor with local Codex
 
+Use `/hstack-poteto-mode` for hstack and `/poteto-mode` for the original pstack. All hstack skill and agent names have a distinct prefix. See [invocation and automatic discovery](invocation.md) for the portable skill installation, which can coexist with the original pstack.
+
 ## Build and load the fork
 
 After reviewing the adaptation PR, clone `https://github.com/huankoh/plugins.git` and check out the tested revision containing it. Before merge, that is the `feat/pstack-codex-support` branch. From the clone root:
@@ -17,7 +19,7 @@ In Cursor, open **Customize → Add Marketplace → Import from Disk** (or **Plu
 
 Do not import `dist/hstack/cursor` directly. That generated directory can initially display 45 skills, but it is not a Git repository: runtime fetches then fail with “not a git repository.” Selecting `dist/hstack/cursor/plugins/hstack` instead fails earlier because it has no marketplace manifest. The stable installation provides both `.cursor-plugin/marketplace.json` and its own Git history.
 
-Confirm hstack and its 45 skills appear in Customize. Use its `poteto-mode` skill, explicitly selecting the fork's package rather than another pstack installation. Ask the agent to read the package's `BUILD.json` and report its fingerprint. The tested native catalog gave a full path for `setup-pstack`; poteto-mode was loaded as a sibling from that installed cache. A short model-visible catalog does not mean the other installed skills were removed.
+Confirm hstack and its 45 uniquely named skills appear in Customize. Invoke `/hstack-poteto-mode` and ask the agent to read the package's `BUILD.json` and report its fingerprint. Before the namespace change, the recorded native catalog exposed `setup-pstack`, and poteto-mode was loaded as a sibling from that cache. That historical test does not establish discovery of the renamed package.
 
 Cursor filters some files when creating its cache. The tested review path retains all required skills and runner files. Use the complete stable marketplace or source checkout for Benny installation and for Codex's optional Comment Sicko translation, which need assets omitted from the Cursor cache.
 

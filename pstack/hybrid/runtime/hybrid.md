@@ -2,6 +2,8 @@
 
 Execution backend and model selection are independent. Preserve existing role preferences. The CLI runner omits model flags unless the caller explicitly supplies a Codex model. Omitting flags uses the CLI's configured default, which may differ from Cursor's current model.
 
+Keep the selected stack explicit across hosts. A Cursor or Grok coordinator assigns `hstack-poteto-mode` and supplies the destination host's absolute hstack entrypoint and runtime adapter paths. A local path alone does not activate a remote workflow. The receiving agent verifies those files before work and resolves siblings through that package's `SKILL-MAP.json`. Missing hstack files or credentials produce a specific setup failure; they never authorize fallback to upstream pstack or an unrelated native model. Codex review/rescue workers receive only their bounded role and do not restart the full mode.
+
 ## Roles and handoff
 
 1. Cursor implements on its own branch. Finish or checkpoint changes as a commit; record the original base and resulting head SHA. Include acceptance checks and the bounded request in a JSON task file. Local file pointers do not transfer to another VM.

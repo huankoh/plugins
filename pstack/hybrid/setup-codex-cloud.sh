@@ -62,12 +62,12 @@ skills = package / 'skills'
 build = json.loads((package / 'BUILD.json').read_text())
 if build['source_revision'] != revision:
     raise SystemExit('Package revision does not match the requested commit.')
-expected = {path.parent.name for path in (source / 'pstack/skills').glob('*/SKILL.md')}
+expected = {'hstack-' + path.parent.name for path in (source / 'pstack/skills').glob('*/SKILL.md')}
 actual = {path.parent.name for path in skills.glob('*/SKILL.md')}
 if not expected or actual != expected:
     raise SystemExit('Generated skills do not match the selected source.')
 for relative in ('hybrid/runtime/codex.md', 'config/default-models.json',
-                 'references/codex-runtime.md', '.codex-plugin/plugin.json'):
+                 'SKILL-MAP.json', '.codex-plugin/plugin.json'):
     if not (package / relative).is_file():
         raise SystemExit(f'Generated package is missing {relative}.')
 
@@ -75,7 +75,28 @@ link = discovery / 'hstack'
 link.parent.mkdir(parents=True, exist_ok=True)
 if link.is_symlink():
     if link.resolve() != skills:
-        raise SystemExit(f'Refusing to replace a different existing skill link: {link}')
+        old = link.resolve()
+        managed_builds = (root / 'builds').resolve()
+        try:
+            relative = old.relative_to(managed_builds)
+        except ValueError:
+            raise SystemExit(f'Refusing to replace an unmanaged skill link: {link}')
+        import re
+        if (len(relative.parts) != 5 or not re.fullmatch(r'[0-9a-f]{40}', relative.parts[0])
+                or relative.parts[1:] != ('codex', 'plugins', 'hstack', 'skills')):
+            raise SystemExit(f'Refusing to replace an unmanaged skill link: {link}')
+        old_build = old.parent / 'BUILD.json'
+        try:
+            previous = json.loads(old_build.read_text())
+        except (OSError, ValueError):
+            raise SystemExit(f'Previous hstack skill link has no valid build record: {link}')
+        if previous.get('runtime') != 'codex' or previous.get('source_revision') != relative.parts[0]:
+            raise SystemExit(f'Previous hstack skill link has an inconsistent build record: {link}')
+        replacement = discovery / '.hstack-next'
+        if replacement.exists() or replacement.is_symlink():
+            raise SystemExit(f'Refusing to replace an existing temporary link: {replacement}')
+        replacement.symlink_to(skills, target_is_directory=True)
+        replacement.replace(link)
 elif link.exists():
     raise SystemExit(f'Refusing to replace an existing skill directory: {link}')
 else:

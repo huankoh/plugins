@@ -3,6 +3,7 @@
 import argparse
 import hashlib
 import json
+import os
 from pathlib import Path
 import re
 import shutil
@@ -13,6 +14,75 @@ import yaml
 SOURCE = Path(__file__).resolve().parents[1]
 HYBRID = SOURCE / 'hybrid'
 NAME = 'hstack'
+
+
+def namespace_package(target):
+    """Rename bundled entrypoints and their resolved references, leaving source URLs intact."""
+    target = Path(target).resolve()
+    skills = {path.name: NAME + '-' + path.name for path in (target / 'skills').iterdir()
+              if (path / 'SKILL.md').exists()}
+    agents = {path.stem: NAME + '-' + path.stem for path in (target / 'agents').glob('*.md')}
+    agent_labels = {yaml.safe_load(path.read_text().split('---')[1])['name']: agents[path.stem]
+                    for path in (target / 'agents').glob('*.md')}
+
+    def relocated(path):
+        parts = list(path.relative_to(target).parts)
+        if len(parts) > 1 and parts[0] == 'skills' and parts[1] in skills:
+            parts[1] = skills[parts[1]]
+        elif len(parts) == 2 and parts[0] == 'agents' and Path(parts[1]).stem in agents:
+            parts[1] = agents[Path(parts[1]).stem] + '.md'
+        return target.joinpath(*parts)
+
+    slugs = '|'.join(re.escape(name) for name in sorted(skills, key=len, reverse=True))
+    agent_slugs = '|'.join(re.escape(name) for name in agents)
+    for path in sorted(target.rglob('*.md')):
+        if path.is_relative_to(target / 'hybrid'):
+            continue
+        original = path.read_text()
+
+        def link(match):
+            address = match[1]
+            location, separator, fragment = address.partition('#')
+            if not location or re.match(r'^[a-zA-Z][a-zA-Z0-9+.-]*:', location):
+                return match[0]
+            resolved = (path.parent / location).resolve()
+            if not resolved.is_relative_to(target) or not resolved.exists():
+                return match[0]
+            replacement = os.path.relpath(relocated(resolved), relocated(path).parent)
+            return '](' + replacement + separator + fragment + ')'
+
+        updated = re.sub(r'\]\(([^\s)]+)\)', link, original)
+        # URLs refer to canonical upstream files, even when their paths contain skill names.
+        pieces = re.split(r'(https?://[^\s<>]+)', updated)
+        for index in range(0, len(pieces), 2):
+            value = pieces[index]
+            value = re.sub(r'(?<![\w./:-])([/$])(' + slugs + r')(?=$|[^\w/-])',
+                           lambda match: match[1] + skills[match[2]], value)
+            value = re.sub(r'(?<![\w./:-])skills/(' + slugs + r')(?=/)',
+                           lambda match: 'skills/' + skills[match[1]], value)
+            value = re.sub(r'(?<![\w-])(' + agent_slugs + r')(?![\w-])',
+                           lambda match: agents[match[1]], value)
+            for label, name in agent_labels.items():
+                value = re.sub(r'(?<![\w-])' + re.escape(label) + r'(?![\w-])', name, value)
+            value = re.sub(r'(`|\*\*)(' + slugs + r')\1',
+                           lambda match: match[1] + skills[match[2]] + match[1], value)
+            pieces[index] = value
+        path.write_text(''.join(pieces))
+    for old, new in skills.items():
+        (target / 'skills' / old).rename(target / 'skills' / new)
+    for old, new in agents.items():
+        path = target / 'agents' / (old + '.md')
+        match = re.match(r'^---\n(.*?)\n---\n', path.read_text(), re.S)
+        metadata = yaml.safe_load(match[1])
+        metadata['name'] = new
+        metadata['description'] = 'Within an explicitly selected hstack workflow. ' + metadata['description']
+        path.write_text('---\n' + yaml.safe_dump(metadata, sort_keys=False) + '---\n' + path.read_text()[match.end():])
+        path.rename(target / 'agents' / (new + '.md'))
+    mapping = {'version': 1, 'plugin': NAME,
+               'skills': {old: 'skills/' + new + '/SKILL.md' for old, new in sorted(skills.items())},
+               'agents': {old: 'agents/' + new + '.md' for old, new in sorted(agents.items())}}
+    (target / 'SKILL-MAP.json').write_text(json.dumps(mapping, indent=2) + '\n')
+    return skills
 
 
 def build(output):
@@ -42,12 +112,19 @@ def build(output):
                             ignore=shutil.ignore_patterns('node_modules', '__pycache__', 'dist', '.venv', '*.pyc'))
         for filename in ('LICENSE', 'README.md'):
             shutil.copy2(SOURCE / filename, target / filename)
+        namespace_package(target)
         for skill in sorted((target / 'skills').glob('*/SKILL.md')):
             match = re.match(r'^---\n(.*?)\n---\n', skill.read_text(), re.S)
             if not match:
                 raise ValueError(f'Missing frontmatter: {skill}')
             metadata = yaml.safe_load(match[1])
             body = skill.read_text()[match.end():].lstrip()
+            metadata['name'] = skill.parent.name
+            metadata['description'] = 'Within an explicitly selected hstack workflow. ' + metadata['description']
+            if skill.parent.name == 'hstack-poteto-mode':
+                metadata['description'] = 'Run hstack engineering workflows when the user requests hstack or hstack-poteto-mode. Bare poteto-mode selects upstream pstack.'
+            elif skill.parent.name == 'hstack-setup-pstack':
+                metadata['description'] = 'Configure hstack model roles when the user requests hstack setup or hstack-setup-pstack. Preserve existing model choices unless a change is requested.'
             if runtime == 'codex':
                 explicit = metadata.get('disable-model-invocation', False)
                 metadata = {'name': skill.parent.name, 'description': metadata['description']}
@@ -55,19 +132,17 @@ def build(output):
                     policy = skill.parent / 'agents/openai.yaml'
                     policy.parent.mkdir(exist_ok=True)
                     # Codex cloud omits explicit-only workflows from its initial catalog.
-                    policy.write_text(yaml.safe_dump({'interface': {'display_name': metadata['name'], 'short_description': metadata['description'][:64]}, 'policy': {'allow_implicit_invocation': metadata['name'] == 'poteto-mode'}}, sort_keys=False))
+                    policy.write_text(yaml.safe_dump({'interface': {'display_name': metadata['name'], 'short_description': metadata['description'][:64]}, 'policy': {'allow_implicit_invocation': metadata['name'] == 'hstack-poteto-mode'}}, sort_keys=False))
             preamble = f'Before following this workflow, read [the {runtime} runtime adapter](../../hybrid/runtime/{runtime}.md). It governs runtime-specific instructions throughout this package.\n\n'
             skill.write_text('---\n' + yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True) + '---\n\n' + preamble + body)
         if runtime == 'codex':
-            (target / 'references').mkdir()
-            shutil.copy2(HYBRID / 'runtime/codex.md', target / 'references/codex-runtime.md')
             (target / 'config').mkdir()
             shutil.copy2(HYBRID / 'runtime/default-models.json', target / 'config/default-models.json')
-            shutil.copy2(HYBRID / 'runtime/setup-codex.md', target / 'skills/setup-pstack/SKILL.md')
+            shutil.copy2(HYBRID / 'runtime/setup-codex.md', target / 'skills/hstack-setup-pstack/SKILL.md')
             manifest = {'name': NAME, 'version': upstream['version'] + '+hstack.' + fingerprint[:12],
                         'description': 'hstack: pstack workflows for Codex CLI and desktop, with optional hybrid execution.',
                         'author': upstream['author'], 'license': 'MIT', 'repository': 'https://github.com/huankoh/plugins',
-                        'skills': './skills/', 'interface': {'displayName': 'hstack', 'shortDescription': 'hstack for Cursor and Codex', 'longDescription': 'All pstack workflows adapted for Codex CLI and desktop with optional hybrid review and rescue.', 'developerName': 'huankoh, based on Lauren Tan’s pstack', 'category': 'Productivity', 'capabilities': [], 'defaultPrompt': 'Use $poteto-mode for this engineering task.'}}
+                        'skills': './skills/', 'interface': {'displayName': 'hstack', 'shortDescription': 'hstack for Cursor and Codex', 'longDescription': 'All pstack workflows adapted for Codex CLI and desktop with optional hybrid review and rescue.', 'developerName': 'huankoh, based on Lauren Tan’s pstack', 'category': 'Productivity', 'capabilities': [], 'defaultPrompt': ['Use $hstack-poteto-mode for this engineering task.']}}
             folder = target / '.codex-plugin'
             marketplace = output / runtime / '.agents/plugins'
             marketplace.mkdir(parents=True)

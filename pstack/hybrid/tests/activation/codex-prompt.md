@@ -1,4 +1,4 @@
-Use **hstack** poteto-mode and its Codex runtime adapter to fix the refund defect
+Use `$hstack-poteto-mode` and its Codex runtime adapter to fix the refund defect
 in the supplied disposable fixture. Record the package identity/source version
 and actual loaded skill/runtime paths. State whether native plugin discovery or
 explicit staged-file loading was used; do not claim one proves the other. If

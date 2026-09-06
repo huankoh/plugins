@@ -19,11 +19,13 @@ Complete the displayed device sign-in in your browser. The bot must never paste 
 
 ## Register the workflow
 
-Ask the bot to save a private skill named `hstack` and enable it for the intended bot under Settings → Plugins → Yours. Supply these instructions, replacing `FORK_DIRECTORY` with the actual absolute path:
+Build the Cursor and Codex packages from the selected source revision using `pstack/hybrid/build.py`. Record both generated package roots and their `BUILD.json` identity. Save a private entry skill named `hstack-poteto-mode` for the intended bot. Scope its description to explicit hstack requests and that bot's role. Keep existing original bots and pstack skills intact. See [the common invocation contract](invocation.md).
 
-> Load FORK_DIRECTORY/pstack/hybrid/runtime/hybrid.md before engineering delegation. Use hstack's adapted pstack skills from this fork and record its revision. Default to Cursor cloud implementation, then Codex review on this VM using FORK_DIRECTORY/pstack/hybrid/runner.py. Preserve model choices. Transfer repository commits and the actual task brief across machines. If Cursor is stuck on a code problem, preserve its checkpoint, stop its writer, and give Codex one rescue attempt. Collect reports and patches, independently review rescue changes, and report the exact verified commit. Do not infer completion from an exit code alone. Per-task instructions can select a different builder or an authenticated Cursor VM for Codex. Never recursively switch backends inside a delegated worker.
+Supply these instructions, replacing `FORK_DIRECTORY` and the package roots with actual absolute paths:
 
-A private entry skill loads the fork directly. Installing upstream marketplace pstack alone does not load these modifications. Confirm the bot can read the fork's hybrid policy and run `doctor` before delegating real work. See [Grok Bot skills](https://docs.x.ai/grok-bot/skills-routines-and-automations).
+> Use hstack-poteto-mode for hstack engineering work. Load the selected package's SKILL-MAP.json, mapped poteto-mode workflow, and applicable Cursor or Codex adapter before each handoff. Resolve all delegated skills and agent instructions within that package. Include the hstack identity and exact entrypoint in delegated prompts. Never replace a missing hstack workflow with an original pstack workflow. Default to Cursor cloud implementation, then Codex review on this VM using FORK_DIRECTORY/pstack/hybrid/runner.py. Preserve model choices. Transfer repository commits and the actual task brief across machines. If Cursor is blocked on code, preserve its checkpoint, stop its writer, and give Codex one bounded rescue attempt. Collect reports and patches, independently inspect rescue changes, and report the exact verified commit. Per-task instructions can select a different builder or an authenticated Cursor VM. A delegated worker must stay within its assigned role.
+
+The private entry skill loads the generated adaptation rather than the canonical unadapted pstack file. Confirm the bot can resolve the mapping and run `doctor` before delegating real work. Grok's command UI is host-specific; use the explicit `hstack-poteto-mode` name in ordinary text when a slash picker is unavailable. See [Grok Bot skills](https://docs.x.ai/grok-bot/skills-routines-and-automations).
 
 ## Verify and recover
 

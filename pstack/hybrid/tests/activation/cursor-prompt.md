@@ -1,4 +1,4 @@
-Use poteto-mode from the installed **hstack** plugin to fix the refund defect in
+Use `/hstack-poteto-mode` to fix the refund defect in
 the supplied disposable fixture. Record the actual plugin identity/version,
 loaded skill and runtime paths. If unavailable, report the installation blocker;
 do not silently substitute upstream pstack. Preserve model preferences.
