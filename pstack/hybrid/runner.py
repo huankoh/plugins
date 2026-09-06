@@ -108,7 +108,14 @@ def submit(args):
         prompt = ('You are a bounded hstack worker. Do not delegate to another execution backend. '
                   'Do not push, merge, or change the source checkout. Return the required JSON report. '
                   'Findings must contain only unresolved blocking issues; use an empty findings array when passing. Put completed work and evidence in summary.\n'
-                  + ('Review only. Do not modify tracked or untracked project files. ' if args.role == 'review' else
+                  + ('Review only. Do not modify tracked or untracked project files. '
+                     'Your verdict covers code correctness and the completeness of your independent review. '
+                     'The runner executes every listed acceptance command after your review and requires all of them to pass before accepting the job. '
+                     'Inspect those checks and use read-only probes where useful. Leave commands that need temporary files or other writes to the runner, '
+                     'even when the task asks you to run them. Disclose deferred execution in summary without claiming those checks passed. '
+                     'A sandbox restriction on running an acceptance command alone is not a blocking code finding. '
+                     'Actual defects, incomplete code review, and other unresolved blockers must still produce a fail or blocked verdict. '
+                     if args.role == 'review' else
                      'Implement only the assigned rescue/implementation. Leave changes in this checkout; do not commit. ')
                   + f'\nOriginal base: {base}\nInput head: {head}\n'
                   + f'Read the hstack Codex adapter at {Path(__file__).parent / "runtime/codex.md"}. '

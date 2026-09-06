@@ -84,9 +84,36 @@ class RunnerTests(unittest.TestCase):
         self.submit(prompt='FAKE_EDIT')
         self.assertEqual(self.collect()['verification'], 'failed')
 
+    def test_review_acceptance_can_use_temporary_files_and_still_gates_success(self):
+        check = """import csv
+import tempfile
+with tempfile.NamedTemporaryFile(mode='w+', suffix='.csv') as fixture:
+    fixture.write('amount\\n7.50\\n')
+    fixture.seek(0)
+    assert list(csv.DictReader(fixture)) == [{'amount': '7.50'}]
+"""
+        job = self.submit(checks=[[sys.executable, '-c', check]])
+        result = self.collect()
+        state = json.loads((self.root / 'state/jobs' / job['worker_id'] / 'state.json').read_text())
+        self.assertEqual(state['sandbox'], 'read-only')
+        self.assertEqual(result['verification'], 'passed')
+        self.assertEqual(result['checks'][0]['exit_code'], 0)
+        self.assertEqual(result['changed_paths'], [])
+        self.assertEqual(self.git('status', '--porcelain'), '')
+        self.submit(key='failing-check', checks=[[sys.executable, '-c', check + 'raise SystemExit(3)\n']])
+        failed = self.collect('failing-check')
+        self.assertEqual(failed['report']['verdict'], 'pass')
+        self.assertEqual(failed['checks'][0]['exit_code'], 3)
+        self.assertEqual(failed['verification'], 'failed')
+
     def test_findings_and_failed_checks_are_not_accepted(self):
         self.submit(prompt='FAKE_FINDING')
         self.assertEqual(self.collect()['verification'], 'failed')
+        self.submit(key='blocked-review', prompt='FAKE_BLOCKED', checks=[[sys.executable, '-c', 'pass']])
+        blocked = self.collect('blocked-review')
+        self.assertEqual(blocked['report']['verdict'], 'blocked')
+        self.assertEqual(blocked['checks'][0]['exit_code'], 0)
+        self.assertEqual(blocked['verification'], 'failed')
         self.submit(key='check', checks=[[sys.executable, '-c', 'raise SystemExit(3)']])
         self.assertEqual(self.collect('check')['verification'], 'failed')
 

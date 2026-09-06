@@ -22,6 +22,9 @@ else:
     report = {'summary': 'fixture result', 'verdict': 'pass', 'findings': []}
     if 'FAKE_FINDING' in prompt:
         report['findings'] = ['Blocking fixture finding']
+    if 'FAKE_BLOCKED' in prompt:
+        report['verdict'] = 'blocked'
+        report['findings'] = ['Independent review could not establish the required contract']
     if 'FAKE_BAD_REPORT' in prompt:
         report = {'invalid': True}
     Path(args[args.index('--output-last-message') + 1]).write_text(json.dumps(report))
