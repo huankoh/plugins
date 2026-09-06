@@ -5,13 +5,13 @@ hstack generates distinct skill and agent names. The original pstack source and 
 | Host | hstack request | Original pstack request |
 | --- | --- | --- |
 | Cursor | `/hstack-poteto-mode` | `/poteto-mode` |
-| Codex native plugin | `$hstack:hstack-poteto-mode` | `$pstack:poteto-mode` |
-| Codex portable skills | `$hstack-poteto-mode` | `$poteto-mode` |
+| Codex qualified catalog (desktop and tested cloud) | `$hstack:hstack-poteto-mode` | `$pstack:poteto-mode` |
+| Codex unqualified portable catalog | `$hstack-poteto-mode` | `$poteto-mode` |
 | Grok Bot | Ask the hstack-configured bot to use `hstack-poteto-mode` | Use the original bot and its pstack workflow |
 
 The same prefix applies to all 45 generated skills, including `hstack-how`, `hstack-architect`, and `hstack-setup-pstack`. Generated named agents also use the prefix. Existing model preferences remain unchanged.
 
-The portable skill name uses hyphens. Codex's native plugin catalog adds the plugin name to the frontmatter name, producing `hstack:hstack-poteto-mode`. A staged portable skill keeps `hstack-poteto-mode`. Select the matching entry shown by the host; `hstack:poteto-mode` is not the cross-host command contract. Cursor documents `/skill-name` and requires the skill name to match its folder. [Cursor skills](https://cursor.com/docs/skills)
+The skill's own name uses hyphens: `hstack-poteto-mode`. Codex can add the package namespace in its catalog, producing `hstack:hstack-poteto-mode`; both the local native plugin and the tested cloud installation displayed that qualified name. Select the matching entry shown by the host. `hstack:poteto-mode` is not the cross-host command contract. Cursor documents `/skill-name` and requires the skill name to match its folder. [Cursor skills](https://cursor.com/docs/skills)
 
 After selecting hstack, its runtime resolves delegated workflows and agent instructions from that package's `SKILL-MAP.json`. It must report missing instructions or host capabilities instead of substituting an original pstack skill. When a named hstack agent is unavailable, the coordinator can brief a supported generic worker with the exact bundled agent instructions.
 
@@ -19,21 +19,21 @@ For implementation in Cursor, hstack defaults to Cursor building and an actual C
 
 ## Make Cursor skills available automatically
 
-The portable installer exports the generated package into Cursor's supported skill directory:
+The tested setup combines the [pinned GitHub marketplace installation](cursor-local.md#install-the-pinned-remote-marketplace) with personal skill export and **Sync Skills for Cloud Agents**. The namespaced package is on the distribution's review branch, not yet `main`. After building the selected source, export its skills:
 
 ```bash
-python3 pstack/hybrid/install-cursor-skills.py dist/hstack/cursor/plugins/hstack
+.venv/bin/python pstack/hybrid/install-cursor-skills.py dist/hstack/cursor/plugins/hstack
 ```
 
 The default destination is `~/.cursor/skills`. Only uniquely named hstack directories are managed. Original pstack and other personal skills stay in place. An existing unrecognized directory or local edits cause the installer to stop.
 
 Each public skill loads its full workflow from a shared package under `hstack-poteto-mode/references/`. All dependencies travel with the exported skills. Internal workflow documents use `WORKFLOW.md` so Cursor does not discover a second set of duplicate skills inside that payload.
 
-For a repository-contained installation, pass `--destination /absolute/repository/.cursor/skills` and include the exported files in the repository. Cursor documents repository skills as available to Cloud Agents. Personal skill sync is another supported route when **Settings → Agents → Context and Tools → Sync Skills for Cloud Agents** is available and enabled. Syncing personal skills applies to that directory as a whole. [Cloud skill support](https://cursor.com/help/ai-features/cloud-agents)
+Enable **Settings → Agents → Context and Tools → Sync Skills for Cloud Agents** and wait for **Skills synced**. Sync applies to the personal skills directory as a whole. The recorded setup contained 47 skills: 45 hstack exports and two preserved existing styles. [Cloud skill support](https://cursor.com/help/ai-features/cloud-agents)
 
-The hstack cloud startup also supports exporting the selected package into the connected repository before the agent begins. It excludes only those generated directories through that repository's local Git metadata, keeping them out of application commits. The [cloud setup guide](cursor-cloud.md) records which automatic discovery route has been tested.
+The [fresh cloud test](https://cursor.com/agents/bc-d843572d-c606-49ae-9ecf-c3023d85788b) then found `hstack-poteto-mode` and `hstack-setup-pstack` in its initial catalog and loaded the entrypoint, package map, and Cursor runtime without manual file paths. It selected the native plugin cache for distribution commit `66b1ac1ac6ae2c190a9ff20a9f1db28f367c4977`, built from source `bbe9d3e`. This verifies the combined setup; the evidence does not isolate personal sync as the cause of native plugin discovery.
 
-Cursor support has acknowledged cloud plugin-loading failures and separate duplicate-name resolution issues. The supported skill directories and distinct names address those two problems independently. Native plugin registration remains a separate test. [Cloud plugin report](https://forum.cursor.com/t/plugins-pstack-not-loading-in-cloud-environments/169740), [duplicate-name report](https://forum.cursor.com/t/workspace-skill-resolution-issue-with-identical-skill-names/162287)
+The earlier cloud Start exporter placed 45 wrappers in project `.cursor/skills` and kept Git clean, but did not establish discovery. It remains an optional export utility, not the current cloud recipe. The [cloud guide](cursor-cloud.md) records the tested Build, normal Start command, and separate CLI/authentication preparation. Personal skill availability does not make every cloud VM ready to execute Codex.
 
 ## Verify selection
 

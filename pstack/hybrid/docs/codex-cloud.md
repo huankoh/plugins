@@ -4,7 +4,7 @@ Use this guide for repository tasks in [Codex cloud](https://chatgpt.com/codex).
 
 ## Prepare a pinned setup script
 
-Choose a tested full commit SHA from [the hstack fork](https://github.com/huankoh/plugins). The selected revision must contain `pstack/hybrid/build.py`. Use the exact SHA throughout setup and verification.
+Choose a tested full commit SHA from [the hstack fork](https://github.com/huankoh/plugins). Fresh namespaced Codex cloud discovery passed at `bbe9d3e5d3f3531227e4c5d88da99a6394540bb1`. The selected revision must contain `pstack/hybrid/build.py`. Use the exact SHA throughout setup and verification.
 
 Open [setup-codex-cloud.sh](../setup-codex-cloud.sh) from your reviewed checkout. To prepare text for the environment's setup field, prepend the selected SHA to the complete script:
 
@@ -31,7 +31,7 @@ Paste the script into the environment settings instead of calling a file from th
 
 Setup needs internet access to GitHub and the pinned Python package dependency. It creates a version-specific virtual environment and builds the complete hstack package. This setup uses no API keys, CLI login, or model overrides. Codex cloud authenticates its own agent through your account. Setup internet access and agent internet access are separate environment settings. [Codex cloud environments](https://learn.chatgpt.com/docs/environments/cloud-environment)
 
-The script leaves the connected task repository unchanged. It also preserves existing model preferences and refuses to replace a different `~/.agents/skills/hstack` directory or symlink.
+The script leaves the connected task repository and existing model preferences unchanged. It validates that all 45 generated skill folders carry the `hstack-` prefix and match the selected source, and requires `SKILL-MAP.json` and the runtime/configuration files. It refuses an unrelated `~/.agents/skills/hstack` directory or symlink. An earlier managed link can be updated only when it resolves into this installer's `builds/<full-SHA>/codex/plugins/hstack/skills` tree and its `BUILD.json` confirms that prior revision and runtime.
 
 ## Verify discovery before using the workflow
 
@@ -45,8 +45,8 @@ The setup creates this layout:
 ├── builds/<SHA>/codex/plugins/hstack/
 │   ├── skills/
 │   ├── hybrid/runtime/
-│   ├── references/
 │   ├── config/
+│   ├── SKILL-MAP.json
 │   └── BUILD.json
 └── setup.json
 
@@ -57,16 +57,20 @@ Read `setup.json` and `BUILD.json` to verify the source revision and fingerprint
 
 Codex documents user skills under `~/.agents/skills` and supports symlinked skill folders. The cloud task must demonstrate whether its own runtime discovers those files. A local discovery result does not establish cloud support. [Codex skill discovery](https://learn.chatgpt.com/docs/build-skills)
 
-Expect two hstack entries in the native initial catalog, `hstack:poteto-mode` and `hstack:setup-pstack`. The generated Codex package permits implicit selection of those entry points. The other 43 workflows retain explicit invocation policy, and `poteto-mode` reads the relevant sibling files as it follows its playbook. This permission makes a workflow available for matching requests; it does not run the workflow on every task. [Codex invocation policy](https://learn.chatgpt.com/docs/build-skills)
+The generated entrypoint names are `hstack-poteto-mode` and `hstack-setup-pstack`; select the entries shown by the actual cloud catalog. The tested cloud loader displayed the mode as `$hstack:hstack-poteto-mode`. A catalog qualifier does not itself establish native plugin registration: this setup stages skills through `~/.agents/skills/hstack`. The generated package permits implicit selection of its two entrypoints. The other 43 workflows retain explicit invocation policy, and the entrypoint reads its matching sibling files through `SKILL-MAP.json`. These policies make workflows available for matching requests; they do not run hstack on every task. [Codex invocation policy](https://learn.chatgpt.com/docs/build-skills)
 
-A [live cloud probe](https://chatgpt.com/codex/cloud/tasks/task_e_6a9d439015e8832782f23ae35e82b2d6) verified those two catalog entries, resolved package paths, the Investigation playbook, and native independent delegation. It left the connected repository unchanged. The probe changed only generated `poteto-mode` invocation metadata. The builder now produces that metadata directly, so no setup override is needed.
+A [fresh namespaced cloud task](https://chatgpt.com/codex/cloud/tasks/task_e_6a9d8b928a948327a1651fa41fb192b4) completed on 2026-09-07 in 3m 14s. Its initial catalog contained `hstack:hstack-poteto-mode`. It loaded the normal entrypoint at `/root/.local/share/hstack-codex-cloud/builds/bbe9d3e5d3f3531227e4c5d88da99a6394540bb1/codex/plugins/hstack/skills/hstack-poteto-mode/SKILL.md`, verified source `bbe9d3e5d3f3531227e4c5d88da99a6394540bb1` and fingerprint `dc2ec751f51e2bba5a24770ed321447aea68f1aa14e25a9d4a5b4038b9fac868`, and read the Codex adapter and package map. Mapped `hstack-poteto-mode`, `hstack-how`, `hstack-unslop`, and `hstack-poteto-agent` instructions resolved within the same package.
+
+The connected checkout remained clean, with no file edits, model changes, authentication actions, or nested CLI execution. Native spawn was unavailable; follow-up and wait tools alone could not start an independent delegate. This pass establishes discovery and workflow selection, not an independent review or a new coding result. The [saved test environment](https://chatgpt.com/codex/cloud/settings/environment/6a9d40eecae08191a1c0f4ed6a8e4f36) fetches the complete setup script from the tested source revision.
+
+A [historical cloud probe](https://chatgpt.com/codex/cloud/tasks/task_e_6a9d439015e8832782f23ae35e82b2d6) verified the former `hstack:poteto-mode` and `hstack:setup-pstack` catalog entries, resolved package paths, the Investigation playbook, and native independent delegation. It predates the unique `hstack-` names; its available delegation tools and review result remain separate from the current discovery-only test.
 
 If an older package exposes only `setup-pstack`, check its invocation policy before changing discovery paths. The first cloud test used a package with all 44 other workflows marked explicit-only. Exposing `poteto-mode` resolved that catalog limitation. Absence from the initial catalog alone does not prove the loader missed a skill.
 
 Record these outcomes separately:
 
 - Native skill discovery means hstack appears in the cloud task's actual skill catalog.
-- Explicit file loading means the agent reads the generated `skills/poteto-mode/SKILL.md` and `hybrid/runtime/codex.md` directly.
+- Explicit file loading means the agent reads the generated `skills/hstack-poteto-mode/SKILL.md` and `hybrid/runtime/codex.md` directly.
 - Plugin registration requires evidence from the host's plugin mechanism. This script does not register a marketplace or install a cloud plugin.
 
 If the runtime does not discover hstack, use explicit file loading to test the workflow and report that limitation. If the package is missing, report the setup failure. Do not present either outcome as native plugin installation.
@@ -75,7 +79,7 @@ If the runtime does not discover hstack, use explicit file loading to test the w
 
 Use the [activation kit](../tests/activation/README.md) from the pinned source checkout. Give the agent [the Codex prompt](../tests/activation/codex-prompt.md), with absolute paths for the package, a fresh disposable fixture, and an evidence directory outside that fixture.
 
-Ask the agent to follow hstack's `poteto-mode`, reproduce the receipt defect, implement the fix, and run the real CLI acceptance tests. The expected baseline has four tests with three failures. The repaired sample has `paid=21.35`, `refunded=3.40`, `net=17.95`, and `settled_count=3`.
+Ask the agent to follow `hstack-poteto-mode`, reproduce the receipt defect, implement the fix, and run the real CLI acceptance tests. The expected baseline has four tests with three failures. The repaired sample has `paid=21.35`, `refunded=3.40`, `net=17.95`, and `settled_count=3`.
 
 Use native Codex delegation for independent review when the cloud task exposes that capability. If delegation is unavailable, mark independent review unverified. Do not launch a nested Codex CLI to substitute for missing native tools. Direct Codex cloud execution does not test the separate Cursor-to-Codex runner connection.
 
@@ -83,7 +87,7 @@ Keep the connected project unchanged. Commit fixture repairs only inside its dis
 
 ## Update the pinned version
 
-Update the setup SHA and reset the environment cache before starting a fresh task. The script can rerun at the same revision. It refuses to replace a discovery link pointing at another version or installation. To roll back, select the previous reviewed SHA and prepare a fresh cache.
+Replace an older pasted setup script with the complete current script and update its SHA, or use a wrapper that fetches the complete script from that pinned revision. Changing only the SHA in an old script retains its old validation and upgrade behavior. Reset the environment cache before starting a fresh task. The script can rerun at the same revision and can switch an existing, verified managed link to a newly built revision. Unrelated links, directories, and inconsistent build records remain protected. To roll back, select the previous reviewed SHA and prepare a fresh cache.
 
 No maintenance script is required for a fixed pinned package stored outside the task checkout. Repositories with their own changing dependencies may still need maintenance commands. Preserve those project-specific commands.
 

@@ -2,28 +2,52 @@
 
 Use `/hstack-poteto-mode` for hstack and `/poteto-mode` for the original pstack. All hstack skill and agent names have a distinct prefix. See [invocation and automatic discovery](invocation.md) for the portable skill installation, which can coexist with the original pstack.
 
-## Build and load the fork
+## Install the pinned remote marketplace
 
-After reviewing the adaptation PR, clone `https://github.com/huankoh/plugins.git` and check out the tested revision containing it. Before merge, that is the `feat/pstack-codex-support` branch. From the clone root:
+The namespaced release is under review on `huankoh/hstack`'s `feat/namespaced-hstack-skills` branch. It is not yet the default-branch package. The adaptation source remains in `huankoh/plugins` on `feat/pstack-codex-support`. Pin the tested distribution commit instead of importing an unqualified default branch:
+
+```bash
+agent plugin marketplace add https://github.com/huankoh/hstack.git \
+  --git-ref 66b1ac1ac6ae2c190a9ff20a9f1db28f367c4977
+```
+
+This command was verified with Cursor Agent CLI `2026.09.02-c22c1a3`. Use the actual `agent` executable path if it is not on `PATH`. `--git-ref` accepts a branch, tag, or commit; the command above selects the tested commit explicitly.
+
+If an older marketplace named `hstack` is already registered, first inspect `agent plugin marketplace list`. The tested CLI retained the old file-URL registration when the new URL reused its name. Remove that old hstack registration with `agent plugin marketplace remove hstack`, then repeat the pinned add command. Do not remove the original pstack marketplace.
+
+In native Cursor, open **Customize → Add**, choose **hstack** from the registered marketplace, and install it. Start a fresh local task afterward. Registering the marketplace alone does not install its plugin.
+
+## Verify local discovery
+
+The native Cursor task **Hstack-poteto-mode activation**, run on **This Mac** without a repository on 2026-09-07, passed local discovery for source `bbe9d3e5d3f3531227e4c5d88da99a6394540bb1`. The catalog exposed 45 hstack skills and two agents, including `hstack-poteto-mode` and `hstack-setup-pstack`, separately from original pstack's `setup-pstack`. It selected hstack and loaded its Cursor runtime adapter without a manual file path.
+
+The tested package is `0.14.8+hstack.dc2ec751f51e`, distributed by the pinned commit above. The local receipt is `outputs/hstack-namespace-cursor-local.json` in the verification workspace. This test changed no authentication or model settings and ran no Codex job; cloud discovery and authenticated review are separate checks.
+
+Invoke `/hstack-poteto-mode` and verify that the loaded skill belongs to hstack, with its `BUILD.json` and `SKILL-MAP.json` resolving the selected package. Original pstack remains `/poteto-mode`. See [invocation and discovery](invocation.md) for portable skills and the host-specific naming rules.
+
+## Build from the source fork
+
+For development or the runner commands below, clone `https://github.com/huankoh/plugins.git` and check out the tested source revision. The adaptation is on `feat/pstack-codex-support` before merge. From that clone's root:
 
 ```bash
 python3 -m venv .venv
 .venv/bin/pip install -r pstack/hybrid/requirements.txt
 .venv/bin/python pstack/hybrid/build.py
+```
+
+Building creates the Cursor and Codex packages under `dist/hstack`; it does not install or register either package. Keep the complete source or generated package available for auxiliary assets that Cursor may omit from its cache.
+
+### Earlier local-file marketplace method
+
+Before the pinned remote marketplace was registered, local testing used:
+
+```bash
 python3 pstack/hybrid/install-cursor-local.py dist/hstack/cursor
 ```
 
-The installer copies the generated marketplace into a dedicated Git repository at **`~/.local/share/hstack-cursor-marketplace`**. It commits changed package contents locally, preserves earlier commits for Cursor's cached fetches, and reports `unchanged` when run again with identical contents. Use `--destination /absolute/path` to choose another location. It refuses unrecognized existing destinations and local edits; it does not push or change global Git settings.
+That installer publishes a generated marketplace into its own Git repository at `~/.local/share/hstack-cursor-marketplace`, preserving cached revisions and refusing unrelated destinations or local edits. Cursor's **Import from Disk** UI can import that repository. This is the earlier development method, not the remote installation used by the current discovery test.
 
-In Cursor, open **Customize → Add Marketplace → Import from Disk** (or **Plugins → Add → From Local Repository** in the other layout) and select **`~/.local/share/hstack-cursor-marketplace`** (or the installer-reported path). Choose **hstack** from the imported marketplace and install it. Rebuild and rerun the installer when updating hstack, then refresh the imported marketplace in Cursor.
-
-Do not import `dist/hstack/cursor` directly. That generated directory can initially display 45 skills, but it is not a Git repository: runtime fetches then fail with “not a git repository.” Selecting `dist/hstack/cursor/plugins/hstack` instead fails earlier because it has no marketplace manifest. The stable installation provides both `.cursor-plugin/marketplace.json` and its own Git history.
-
-Confirm hstack and its 45 uniquely named skills appear in Customize. Invoke `/hstack-poteto-mode` and ask the agent to read the package's `BUILD.json` and report its fingerprint. Before the namespace change, the recorded native catalog exposed `setup-pstack`, and poteto-mode was loaded as a sibling from that cache. That historical test does not establish discovery of the renamed package.
-
-Cursor filters some files when creating its cache. The tested review path retains all required skills and runner files. Use the complete stable marketplace or source checkout for Benny installation and for Codex's optional Comment Sicko translation, which need assets omitted from the Cursor cache.
-
-Cursor also documents `~/.cursor/plugins/local/hstack` symlinks for plugin development, but that discovery path did not expose hstack in the tested Agents UI after reload. Use the marketplace import above for this setup. On managed accounts, an admin may control local imports. See [Cursor plugins](https://cursor.com/docs/plugins) and [marketplace structure](https://cursor.com/docs/reference/plugins#cursor-multi-plugin-repositories).
+Importing `dist/hstack/cursor` directly previously failed during runtime fetch because it is not its own Git repository. Importing `dist/hstack/cursor/plugins/hstack` lacks the marketplace manifest. A development symlink at `~/.cursor/plugins/local/hstack` also failed to expose the plugin in the tested Agents UI. These earlier failures do not describe the current pinned remote marketplace. [Cursor plugins](https://cursor.com/docs/plugins), [marketplace structure](https://cursor.com/docs/reference/plugins#cursor-multi-plugin-repositories)
 
 ## Prepare Codex
 

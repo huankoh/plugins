@@ -1,22 +1,99 @@
 # hstack verification record
 
-Validation date: 2026-09-06. Upstream baseline: `93b00b89ef425a9c1bac0d0b317dfc49c930ac99`, pstack 0.14.8.
+Upstream baseline: `93b00b89ef425a9c1bac0d0b317dfc49c930ac99`, pstack 0.14.8.
 
-## Local checks
+## Current namespace and discovery checks: 2026-09-07
 
-- 32 Python package/runner/installer/auth-bootstrap tests pass on macOS with Python 3.9. Tests use an explicit CLI double for failure, cancellation, timeouts, duplicate keys, interrupted records, checkout ownership, patch collection and stale-review rejection. Installer tests cover repeat/update Git fetches, preservation of local changes, and failed-copy recovery. Auth tests cover private permissions, symlink and repository-path refusal, atomic concurrent restoration, preservation of refreshed credentials, and removal of the seed from real supervisor, Git and acceptance-check processes.
-- Both generated packages preserve all 45 skills and 18 inherited role defaults. Codex entrypoint discovery and its invocation-policy adjustment are recorded below.
-- Generated Codex package passes the native plugin-creator validator. Native app-server discovery found all 45 namespaced skills with no errors in a disposable workspace; `plugin/read` resolved the generated marketplace/package without installation.
-- Existing pstack orchestration/watch-pr tests: 52 pass, 0 fail, with Bun 1.3.10. Existing strict TypeScript check passes.
-- Python syntax compilation and shell syntax checks pass.
+The current runtime source is `bbe9d3e5d3f3531227e4c5d88da99a6394540bb1`,
+with fingerprint
+`dc2ec751f51e2bba5a24770ed321447aea68f1aa14e25a9d4a5b4038b9fac868`.
+Distribution commit `66b1ac1ac6ae2c190a9ff20a9f1db28f367c4977` packages that
+source. Both runtimes contain 45 distinctly named `hstack-` skills, two
+`hstack-` agents, and a complete `SKILL-MAP.json`. The canonical pstack skill
+and agent trees remain unchanged.
 
-## Live CLI checks
+The [current source CI run](https://github.com/huankoh/plugins/actions/runs/34042006313)
+passed 48 Python tests, 52 upstream tests, and the strict TypeScript check.
+Namespace tests cover unique names, exact mapped files, nested links, preserved
+source URLs, discoverable entrypoints, and the other 43 explicit-only workflows.
+Installer and activation tests cover preserved personal files, refused local
+edits, rollback after copy failure, tracked-skill protection, and repeat runs.
+
+| Host | Current observed result | What this establishes |
+| --- | --- | --- |
+| Codex local native plugin | A fresh native catalog found all 45 hstack skills alongside all 45 original personal pstack skills. Its distinct entries include `$hstack:hstack-poteto-mode` and `$pstack:poteto-mode`. | Native discovery and coexistence. Unqualified catalogs use `$hstack-poteto-mode`; see the [local discovery record](codex.md#verified-local-discovery). |
+| Cursor local | Distribution `66b1ac1` exposed 45 skills and two agents. `/hstack-poteto-mode` was found in the native catalog and read normally. | Local selection of the renamed package. This read-only probe performed no Codex authentication or review job. |
+| Cursor cloud | A [fresh task](https://cursor.com/agents/bc-d843572d-c606-49ae-9ecf-c3023d85788b) initially listed both `hstack-poteto-mode` and `hstack-setup-pstack`, then loaded source `bbe9d3e` through its native plugin cache. | Automatic native entrypoint discovery in this tested cloud configuration, without an explicit staged-file loading instruction. |
+| Codex cloud | A [fresh task](https://chatgpt.com/codex/cloud/tasks/task_e_6a9d8b928a948327a1651fa41fb192b4) initially listed `hstack:hstack-poteto-mode`, then loaded the namespaced entrypoint, Codex adapter, and package map at source `bbe9d3e`. | Native catalog discovery and same-package selection. Native spawn was unavailable, so this run does not claim an independent delegate review. |
+| Grok Bot | The separate Dr. EggBot (hstack) is pinned to `bbe9d3e` and passed 21 namespace, exact-identity, and preservation checks. | Bot configuration and scoped routing checks. No Grok-side Codex login or execution has been verified. |
+
+The successful Cursor cloud task resolved hstack from its native plugin cache
+under `cache/hstack/61205765/66b1ac1...`, checked the recorded source and
+fingerprint, and read the Cursor adapter and package map. It selected
+`hstack-how` and `hstack-unslop` from that same package. The connected Git
+checkout remained clean. The task performed no authentication, Codex job, or
+application change, so it establishes discovery and same-package workflow
+selection rather than a new end-to-end coding review.
+
+That cloud run followed GitHub marketplace installation and enabling personal
+skill sync after exporting 45 hstack skills. The personal directory contained
+47 skills in total. The observed load path was the native plugin cache, not the
+personal-skill export. These settings changed together, so the result does not
+isolate which setting enabled discovery. Two earlier Start-script attempts
+exported 45 locally ignored project skills but did not establish initial native
+poteto discovery. Do not present that startup-export route as independently
+verified by the later native-plugin result.
+
+The fresh Codex cloud task completed in 3m 14s and resolved its normal entrypoint
+under `/root/.local/share/hstack-codex-cloud/builds/bbe9d3e5d3f3531227e4c5d88da99a6394540bb1/codex/plugins/hstack/skills/hstack-poteto-mode/SKILL.md`.
+It verified the current source and fingerprint above, then resolved the mapped
+`hstack-poteto-mode`, `hstack-how`, `hstack-unslop`, and `hstack-poteto-agent`
+instructions within that package. Git remained clean; no files, models, or
+authentication settings were changed, and no nested CLI ran. The task exposed
+follow-up and wait tools but no native spawn operation, so it did not perform
+independent delegation. See [the Codex cloud record](codex-cloud.md#verify-discovery-before-using-the-workflow).
+
+An automated local simulation also exercised the new Codex cloud setup script
+against an older managed build containing unprefixed hstack skills. Upgrade and
+repeat execution passed: the discovery symlink selected the new prefixed skills,
+and the old build and original pstack files remained intact. This is local
+upgrade validation; the live discovery result is recorded separately above. Updating an existing cloud
+environment requires the complete current setup script as well as its pinned
+SHA; see [the cloud upgrade procedure](codex-cloud.md#update-the-pinned-version).
+
+Dr. EggBot's corrected private namespace record at `bbe9d3e` passed all 21 checks,
+including package mapping, literal Codex command identities, and refusing an
+upstream-pstack substitute when hstack is missing. The downloaded live entry
+skill matched the package pin and same-package routing contract. Verification
+caught shell interpolation that removed dollar signs from the pin's JSON
+identities; the corrected record now passes exact string-equality checks. The 14-file preservation manifest for the original bots and
+skills passed, the model-rule hash remained unchanged, and both copied
+healthcheck routines remained paused. These are configuration checks; they do
+not establish a Grok-to-Codex coding handoff.
+
+## Historical activation evidence: 2026-09-06
+
+The following tests record the earlier runtime versions and unprefixed hstack
+entrypoints named in each run. Their successful coding, review, and
+authentication results remain useful evidence for those versions. They do not
+by themselves verify the current renamed installation or change the current
+host results above.
+
+### Local checks
+
+- 32 Python package/runner/installer/auth-bootstrap tests passed on macOS with Python 3.9. Tests used an explicit CLI double for failure, cancellation, timeouts, duplicate keys, interrupted records, checkout ownership, patch collection and stale-review rejection. Installer tests covered repeat/update Git fetches, preservation of local changes, and failed-copy recovery. Auth tests covered private permissions, symlink and repository-path refusal, atomic concurrent restoration, preservation of refreshed credentials, and removal of the seed from real supervisor, Git and acceptance-check processes.
+- Both generated packages preserved all 45 skills and 18 inherited role defaults. Codex entrypoint discovery and its invocation-policy adjustment are recorded below.
+- The generated Codex package passed the native plugin-creator validator. Native app-server discovery found all 45 then-current skill names with no errors in a disposable workspace; `plugin/read` resolved the generated marketplace/package without installation.
+- Existing pstack orchestration/watch-pr tests: 52 passed, 0 failed, with Bun 1.3.10. The existing strict TypeScript check passed.
+- Python syntax compilation and shell syntax checks passed.
+
+### Live CLI checks
 
 Codex CLI 0.153.3 used the existing ChatGPT subscription and its configured default model. A real rescue changed subtraction to addition in a disposable fixture, preserved the source checkout and returned a collected patch. The parent applied that patch after inspection and reran its test. A separate real Codex review passed without changing files, and `validate --head HEAD` accepted the exact resulting commit. See [sanitized fixture evidence](../examples/verification-results.json).
 
 The first live rescue returned completion notes as findings, so verification correctly remained failed. The report schema and prompt now explicitly reserve findings for unresolved blocking issues; the revised rescue and independent review passed. Automated fixture tests must not be confused with a real Cursor agent run.
 
-## Cursor local activation
+### Cursor local activation
 
 The initial Cursor installation exposed all 45 generated hstack skills.
 A real Cursor task loaded hstack poteto-mode, reproduced the receipt fixture's
@@ -65,7 +142,7 @@ the Codex Comment Sicko translation also expects an omitted agent source file.
 The full managed marketplace retains these assets. Native Cursor's two registered
 agents are separate from that Codex file-reading path.
 
-## Codex cloud activation
+### Codex cloud activation
 
 The [first cloud task](https://chatgpt.com/codex/cloud/tasks/task_e_6a9d411342dc832795cbd7e87f9779bc)
 used source `2709ca7b8aea576ce28b80c2d04df046d772407d`. It loaded generated
@@ -81,10 +158,10 @@ then changed only generated poteto-mode's `allow_implicit_invocation` from false
 to true on that source version. Its initial native catalog exposed
 `hstack:poteto-mode` and `hstack:setup-pstack`; the task loaded the native skill
 path and Investigation playbook and used native collaboration for independent
-verification without edits. The generated Codex package now encodes that entrypoint
-policy. Build checks confirm exactly those two implicit entries, preserve the
-other 43 explicit-only policies, and pass the native plugin validator. Canonical
-Cursor skills remain unchanged.
+verification without edits. The generated Codex package then encoded that
+entrypoint policy. Build checks confirmed the two then-current implicit entries,
+preserved the other 43 explicit-only policies, and passed the native plugin
+validator. Canonical Cursor skills remained unchanged.
 
 A [committed-package cloud run](https://chatgpt.com/codex/cloud/tasks/task_e_6a9d45f216908327a5dc396b7ea51a80)
 used `e35ef95c149bd2a45776779a11da7e0f68366a2c` with the durable entrypoint
@@ -97,7 +174,7 @@ review was **unverified in this run**. The earlier tasks' successful delegate
 reviews remain separate evidence. Native collaboration availability varied by
 task and must be checked at runtime.
 
-## Linux and host validation
+### Linux and host validation
 
 The `hstack` GitHub Actions job runs package/runner tests, upstream tests/typecheck, and a clean Ubuntu CLI installation/version check twice without credentials. The [first clean Ubuntu run](https://github.com/huankoh/plugins/actions/runs/34019930483), under the previous `pstack hybrid` job name, passed every step, including both CLI installation invocations. Subsequent PR checks validate later changes.
 
@@ -123,7 +200,8 @@ Handoff `hstack-activation-review-20260906`, worker
 `c4fa19a3b5dd7ea88f31d391b6fb9a9ce1656ead`. Codex returned `pass` with no
 findings, the parent ran all four acceptance tests successfully, source snapshots
 matched, and current-HEAD validation passed. No credential-bearing Build was made.
-Native hstack cloud discovery remains unresolved.
+Native hstack cloud discovery remained unresolved in that run. The later
+2026-09-07 discovery result is recorded separately above.
 
 Commit `1447b237746e9ea58525a3b3209b5e8a4c5f20b1` adds runtime-secret bootstrap
 and isolated auth-home selection. Its [CI run](https://github.com/huankoh/plugins/actions/runs/34033410467)
@@ -153,15 +231,16 @@ returned true. This verifies server authentication after automatic secret startu
 on one fresh VM. It does not establish repeated or concurrent fresh-VM token
 renewal. The refreshed cache remains on that VM, and no authenticated snapshot
 was created. See the [sanitized observed-UI evidence](../examples/cursor-cloud-runtime-secret-verification.json).
-The environment remains pinned to the tested runtime commit; later evidence-only
-documentation commits do not require a new Build.
+At the end of that test, the environment remained pinned to the tested runtime
+commit. Later evidence-only documentation commits did not require a new Build.
 
 A GitHub marketplace experiment published the identical tested package on fork
-branch `hstack-cursor` at `0033863ff097f08068f06c73338721715bfeec3e`. Cursor's
-current import UI ignored the `/tree/hstack-cursor` selection and imported the
+branch `hstack-cursor` at `0033863ff097f08068f06c73338721715bfeec3e`. The tested
+import UI ignored the `/tree/hstack-cursor` selection and imported the
 default marketplace instead. That experimental registration was removed; the
-verified local hstack installation remains active. This does not establish
-native hstack cloud registration.
+verified local hstack installation remained active. That experiment did not
+establish native hstack cloud registration.
 
-Grok Bot was not configured or tested during these activation checks. Its guide
-remains a deployment procedure awaiting live validation.
+Grok Bot was outside those earlier activation checks. Its later Dr. EggBot
+configuration and preservation checks are recorded in the current section;
+Grok-side Codex authentication and execution remain unverified.
