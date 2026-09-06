@@ -1,6 +1,7 @@
 import json
 import os
 from pathlib import Path
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -105,6 +106,60 @@ with tempfile.NamedTemporaryFile(mode='w+', suffix='.csv') as fixture:
         self.assertEqual(failed['report']['verdict'], 'pass')
         self.assertEqual(failed['checks'][0]['exit_code'], 3)
         self.assertEqual(failed['verification'], 'failed')
+
+    def test_runner_children_cannot_inherit_auth_seed(self):
+        real_git = shutil.which('git')
+        binary_directory = self.root / 'bin'
+        binary_directory.mkdir()
+        git_calls = self.root / 'git-calls.jsonl'
+        git_wrapper = binary_directory / 'git'
+        git_wrapper.write_text('''#!/usr/bin/env python3
+import json
+import os
+import sys
+
+for key in ('HSTACK_CODEX_AUTH_JSON', 'HSTACK_CODEX_AUTH_HOME', 'OPENAI_API_KEY', 'CODEX_API_KEY',
+            'OPENAI_BASE_URL', 'OPENAI_API_BASE', 'CODEX_BASE_URL'):
+    if key in os.environ:
+        sys.exit(81)
+if os.environ.get('CODEX_HOME') != os.environ['FIXTURE_CODEX_HOME']:
+    sys.exit(82)
+with open(os.environ['FIXTURE_GIT_CALLS'], 'a') as stream:
+    stream.write(json.dumps({'command': sys.argv[3], 'has_index': 'GIT_INDEX_FILE' in os.environ}) + '\\n')
+os.execv(os.environ['FIXTURE_REAL_GIT'], [os.environ['FIXTURE_REAL_GIT'], *sys.argv[1:]])
+''')
+        git_wrapper.chmod(0o755)
+        seed = 'private-runner-seed-fixture-94c21'
+        self.env.update(
+            HOME=str(self.root), CODEX_HOME=str(self.root / 'desktop-codex'),
+            HSTACK_CODEX_AUTH_JSON=seed, OPENAI_API_KEY='fixture-api-key',
+            CODEX_API_KEY='fixture-api-key', OPENAI_BASE_URL='https://fixture.invalid',
+            OPENAI_API_BASE='https://fixture.invalid', CODEX_BASE_URL='https://fixture.invalid',
+            FIXTURE_CODEX_HOME=str(self.root / '.local/share/hstack-codex-auth'),
+            FIXTURE_REAL_GIT=real_git, FIXTURE_GIT_CALLS=str(git_calls),
+            PATH=str(binary_directory) + os.pathsep + os.environ.get('PATH', ''),
+        )
+        self.env.pop('HSTACK_CODEX_AUTH_HOME', None)
+        check = """import os
+for name in ('HSTACK_CODEX_AUTH_JSON', 'HSTACK_CODEX_AUTH_HOME', 'OPENAI_API_KEY', 'CODEX_API_KEY',
+             'OPENAI_BASE_URL', 'OPENAI_API_BASE', 'CODEX_BASE_URL'):
+    assert name not in os.environ, name + ' unexpectedly inherited'
+assert os.environ['CODEX_HOME'] == os.environ['FIXTURE_CODEX_HOME']
+print('AUTH_ENV_ISOLATED')
+"""
+        self.assertTrue(self.call('doctor')['ready'])
+        self.submit(checks=[[sys.executable, '-c', check]])
+        result = self.collect()
+        self.assertEqual(result['verification'], 'passed')
+        self.assertEqual(result['checks'][0]['exit_code'], 0)
+        self.assertEqual(Path(result['checks'][0]['log']).read_text(), 'AUTH_ENV_ISOLATED\n')
+        calls = [json.loads(line) for line in git_calls.read_text().splitlines()]
+        self.assertIn('merge-base', {call['command'] for call in calls})
+        for command in ('read-tree', 'add', 'diff'):
+            self.assertTrue(any(call['command'] == command and call['has_index'] for call in calls))
+        for artifact in (self.root / 'state').rglob('*'):
+            if artifact.is_file():
+                self.assertNotIn(seed.encode(), artifact.read_bytes(), str(artifact))
 
     def test_findings_and_failed_checks_are_not_accepted(self):
         self.submit(prompt='FAKE_FINDING')

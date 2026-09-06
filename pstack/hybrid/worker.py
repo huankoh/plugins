@@ -53,7 +53,12 @@ def read(path):
 
 def environment():
     env = os.environ.copy()
-    for name in ("OPENAI_API_KEY", "CODEX_API_KEY", "OPENAI_BASE_URL", "OPENAI_API_BASE", "CODEX_BASE_URL"):
+    # Keep the selected cache across supervisor launches without forwarding the seed.
+    auth_home = env.get("HSTACK_CODEX_AUTH_HOME")
+    if auth_home or env.get("HSTACK_CODEX_AUTH_JSON"):
+        env["CODEX_HOME"] = str(Path(auth_home or "~/.local/share/hstack-codex-auth").expanduser())
+    for name in ("HSTACK_CODEX_AUTH_JSON", "HSTACK_CODEX_AUTH_HOME", "OPENAI_API_KEY", "CODEX_API_KEY",
+                 "OPENAI_BASE_URL", "OPENAI_API_BASE", "CODEX_BASE_URL"):
         env.pop(name, None)
     return env
 
@@ -66,7 +71,7 @@ def auth_status():
 
 
 def models():
-    path = Path(os.environ.get("CODEX_HOME", "~/.codex")).expanduser() / "models_cache.json"
+    path = Path(environment().get("CODEX_HOME", "~/.codex")).expanduser() / "models_cache.json"
     data = read(path) if path.exists() else {}
     return {"source": str(path), "verified_live": False, "fetched_at": data.get("fetched_at"),
             "effort_note": "ultra omitted; this worker does not implement orchestration-mode semantics",
@@ -99,7 +104,7 @@ def acquire(cwd):
 
 def birth(pid):
     result = subprocess.run(["/bin/ps", "-p", str(pid), "-o", "lstart="],
-                            capture_output=True, text=True, timeout=5)
+                            capture_output=True, text=True, timeout=5, env=environment())
     return result.stdout.strip() if result.returncode == 0 else None
 
 
@@ -281,7 +286,7 @@ def main():
     if args.action == "models":
         emit(models())
     elif args.action == "doctor":
-        version = subprocess.run([BINARY, "--version"], capture_output=True, text=True, timeout=10).stdout.strip()
+        version = subprocess.run([BINARY, "--version"], capture_output=True, text=True, timeout=10, env=environment()).stdout.strip()
         auth = auth_status()
         emit({"binary": BINARY, "version": version, "auth": auth, "ready": auth == "chatgpt",
               "data_root": str(ROOT), "model_source": "account cache; not live-verified"})

@@ -17,7 +17,10 @@ ROOT = worker.ROOT / 'handoffs'
 TERMINAL = {'succeeded', 'failed', 'cancelled', 'interrupted'}
 
 
-def git(repo, *args, env=None):
+def git(repo, *args, index_file=None):
+    env = worker.environment()
+    if index_file is not None:
+        env['GIT_INDEX_FILE'] = str(index_file)
     return subprocess.check_output(['git', '-C', str(repo), *args], env=env,
                                    stderr=subprocess.PIPE).decode().strip()
 
@@ -77,7 +80,8 @@ def submit(args):
     check_task(task)
     repo = canonical_repo(args.repo)
     base, head = commit(repo, args.base), commit(repo, args.head)
-    subprocess.run(['git', '-C', repo, 'merge-base', '--is-ancestor', base, head], check=True, capture_output=True)
+    subprocess.run(['git', '-C', repo, 'merge-base', '--is-ancestor', base, head],
+                   check=True, capture_output=True, env=worker.environment())
     if args.role == 'rescue' and not args.writer_stopped:
         raise ValueError('Rescue requires --writer-stopped after the coordinator confirms the prior writer ended')
     request = dict(repo=repo, base=base, head=head, role=args.role, task=task,
@@ -144,13 +148,14 @@ def submit(args):
 
 def capture(job):
     directory = path_for(job['key'])
-    env = os.environ.copy()
-    env['GIT_INDEX_FILE'] = str(directory / 'artifact.index')
-    git(job['checkout'], 'read-tree', job['head'], env=env)
-    git(job['checkout'], 'add', '-A', '--', '.', env=env)
+    index_file = directory / 'artifact.index'
+    env = worker.environment()
+    env['GIT_INDEX_FILE'] = str(index_file)
+    git(job['checkout'], 'read-tree', job['head'], index_file=index_file)
+    git(job['checkout'], 'add', '-A', '--', '.', index_file=index_file)
     patch = subprocess.check_output(['git', '-C', job['checkout'], 'diff', '--cached', '--binary', job['head']], env=env)
     (directory / 'changes.patch').write_bytes(patch)
-    paths = git(job['checkout'], 'diff', '--cached', '--name-only', job['head'], env=env).splitlines()
+    paths = git(job['checkout'], 'diff', '--cached', '--name-only', job['head'], index_file=index_file).splitlines()
     return {'patch': str(directory / 'changes.patch'), 'changed_paths': paths,
             'result_head': git(job['checkout'], 'rev-parse', 'HEAD')}
 
@@ -185,7 +190,7 @@ def inspect(key, collect=False):
                     with log.open('wb') as stream:
                         try:
                             result = subprocess.run(argv, cwd=job['checkout'], stdout=stream, stderr=subprocess.STDOUT,
-                                                    timeout=job['timeout_seconds'])
+                                                    timeout=job['timeout_seconds'], env=worker.environment())
                             code = result.returncode
                         except subprocess.TimeoutExpired:
                             code = 124
@@ -237,7 +242,8 @@ def main():
     verify.add_argument('--head', required=True)
     args = parser.parse_args()
     if args.action == 'doctor':
-        result = subprocess.run([sys.executable, str(Path(__file__).with_name('worker.py')), 'doctor'])
+        result = subprocess.run([sys.executable, str(Path(__file__).with_name('worker.py')), 'doctor'],
+                                env=worker.environment())
         return result.returncode
     if args.action == 'submit':
         result = submit(args)

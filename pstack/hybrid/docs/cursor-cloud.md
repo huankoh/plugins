@@ -56,7 +56,9 @@ The personal `hstack activation` environment for `huankoh/plugins` was saved thr
 
 The cloud receipt fixture passed all four acceptance tests through explicit hstack file loading. A [fresh agent in the correctly selected environment](https://cursor.com/agents/bc-bdcfc8e2-6f11-4f67-a29d-db8c9533df60) confirmed the same Build, complete pinned package, matching fingerprint, and Codex CLI 0.153.3. The runner found the private installer prefix without an exported binary path. Authentication was unavailable, as expected for a Build without credentials.
 
-That fresh agent did not discover hstack natively. Its initial catalog contained only upstream pstack's `setup-pstack` from the `cursor-public` cache, not hstack's skills. The agent explicitly loaded the staged `poteto-mode` and Cursor runtime adapter. Native cloud plugin registration has not been achieved despite the separate local Cursor plugin installation. The nested Codex review remains pending a new device approval in the task VM.
+That fresh agent did not discover hstack natively. Its initial catalog contained only upstream pstack's `setup-pstack` from the `cursor-public` cache, not hstack's skills. The agent explicitly loaded the staged `poteto-mode` and Cursor runtime adapter. Native cloud plugin registration has not been achieved despite the separate local Cursor plugin installation.
+
+A subsequent device login in that VM enabled a real Codex review. Handoff `hstack-activation-review-20260906`, worker `36e19476b378cd8cf509213ae37ffb20`, reviewed fixture commit `c4fa19a3b5dd7ea88f31d391b6fb9a9ce1656ead`. Codex returned `pass` with no findings, the parent runner passed all four tests, source preservation passed, and HEAD validation returned true. This verifies subscription-authenticated nested execution after device login, separately from secret-based startup.
 
 When starting a task, select the named `hstack activation` environment in the repository/environment picker. Selecting plain `plugins` or `huankoh/plugins` can select a different saved environment. Confirm the environment name and Build on the new task before testing. The pinned bootstrap is independent of the task branch, so selecting `main` also tests that separation.
 
@@ -85,6 +87,22 @@ python3 "$HOME/hstack-bootstrap/pstack/hybrid/runner.py" doctor
 The runner discovers the installer's private prefix without an exported `HSTACK_CODEX_BINARY` when no Codex executable is already on `PATH`. An explicit binary override and a usable `PATH` executable retain precedence. The saved Build verified private-prefix resolution.
 
 Complete the device login yourself in the running task VM. A fresh VM may need another login. Keep the saved Build free of login state, and do not create a new snapshot from an authenticated test VM. Do not repeatedly seed fresh VMs with one old `auth.json` copy. The Pro subscription path does not provide the documented Business/Enterprise workspace personal access tokens. See [authentication](https://learn.chatgpt.com/docs/auth) and [workspace access tokens](https://learn.chatgpt.com/docs/enterprise/access-tokens).
+
+### Restore a dedicated login from a Runtime Secret
+
+`start-cursor.sh` supports a bounded bootstrap experiment with a dedicated ChatGPT login. Create that login with file-backed credential storage in a private directory outside Git. Use a separate session from the desktop. Save its complete managed `auth.json` as `HSTACK_CODEX_AUTH_JSON`, with type **Runtime Secret** and permission **Environment**, in the intended Cursor environment. Do not put the value in a prompt, ordinary environment variable, Install script, repository, or Build. Environment scope limits it to tasks using that environment. [Cursor secret scoping](https://cursor.com/docs/cloud-agent/setup#environment-scoped-secrets)
+
+After the new scripts are installed in a credential-free Build, set its runtime Start command to:
+
+```bash
+bash "$HOME/hstack-bootstrap/pstack/hybrid/start-cursor.sh"
+```
+
+Startup restores credentials into `~/.local/share/hstack-codex-auth` only when `auth.json` is absent. Existing refreshed credentials are preserved. The directory is private, the file is mode `0600`, and the script rejects symlinks, repository paths, and API-key authentication. The hstack worker selects that dedicated home whenever the seed is present, and removes the seed from its child process environments, including verification commands. Set `HSTACK_CODEX_AUTH_HOME` to an absolute private directory if a different location is required; retain that setting if the seed is later removed so hstack keeps selecting the same cache.
+
+This is startup bootstrap, not a shared credential-renewal service. A Pro login refreshes and changes its saved tokens. The refreshed file must survive and return to secure storage before a different VM uses that session. Cursor's current public API does not provide saved-secret write-back. Use one VM for this experiment and preserve its updated cache; do not launch concurrent VMs with the same seed or assume an old secret remains valid. A durable fresh-VM design needs an external private store with exclusive session use and write-back, or a persistent Codex worker. [OpenAI managed-auth maintenance](https://learn.chatgpt.com/docs/auth/ci-cd-auth)
+
+`runner.py doctor` reports cached login readiness. Verify a real read-only handoff before declaring authentication works. Never treat a successful restore or `login status` alone as proof that the server accepts the credential.
 
 A persistent Grok VM can handle routine Codex jobs instead, using Git commit handoffs. The runner does not route between hosts automatically. If nested execution is requested but unauthenticated, report `auth_required` to the coordinator and complete sign-in; do not silently charge an API key.
 
