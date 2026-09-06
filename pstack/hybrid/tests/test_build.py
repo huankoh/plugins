@@ -40,10 +40,17 @@ class BuildTests(unittest.TestCase):
             self.assertEqual(entry['name'], 'hstack')
             cursor = output / 'cursor/plugins/hstack/skills/poteto-mode/SKILL.md'
             codex = output / 'codex/plugins/hstack/skills/poteto-mode/SKILL.md'
-            self.assertIn('disable-model-invocation', cursor.read_text().split('---')[1])
+            self.assertTrue(yaml.safe_load(cursor.read_text().split('---')[1])['disable-model-invocation'])
             self.assertNotIn('disable-model-invocation', codex.read_text().split('---')[1])
             policy = yaml.safe_load((codex.parent / 'agents/openai.yaml').read_text())
-            self.assertFalse(policy['policy']['allow_implicit_invocation'])
+            self.assertTrue(policy['policy']['allow_implicit_invocation'])
+            implicit = set()
+            for skill in (codex.parent.parent).glob('*/SKILL.md'):
+                settings = skill.parent / 'agents/openai.yaml'
+                metadata = yaml.safe_load(settings.read_text()) if settings.exists() else {}
+                if metadata.get('policy', {}).get('allow_implicit_invocation', True):
+                    implicit.add(skill.parent.name)
+            self.assertEqual(implicit, {'poteto-mode', 'setup-pstack'})
             defaults = json.loads((output / 'codex/plugins/hstack/config/default-models.json').read_text())
             self.assertEqual(len(defaults['roles']), 18)
             self.assertEqual(defaults['default'], 'inherit-parent')

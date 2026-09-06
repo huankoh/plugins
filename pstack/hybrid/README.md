@@ -9,6 +9,7 @@ The canonical upstream skills remain in `pstack/skills`; the adaptation source s
 - [Setup overview](docs/setup.md): choose where each process runs.
 - [Cursor and local Codex](docs/cursor-local.md): package build, installation and a review.
 - [Codex CLI and desktop](docs/codex.md): use hstack directly in Codex.
+- [Codex cloud](docs/codex-cloud.md): stage a pinned package and test native cloud workflows.
 - [Grok Bot](docs/grok-bot.md): persistent VM setup and a reusable coordinator brief.
 - [Cursor cloud VM](docs/cursor-cloud.md): preinstall the CLI, authenticate and collect results.
 - [Verification record](docs/verification.md): tested behavior and live-host limitations.

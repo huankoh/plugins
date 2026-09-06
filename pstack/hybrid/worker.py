@@ -15,7 +15,21 @@ import time
 import uuid
 
 ROOT = Path(os.environ.get("HSTACK_CODEX_DATA", "~/.local/share/hstack")).expanduser().resolve()
-BINARY = os.environ.get("HSTACK_CODEX_BINARY") or shutil.which("codex") or ("/Applications/ChatGPT.app/Contents/Resources/codex" if Path("/Applications/ChatGPT.app/Contents/Resources/codex").exists() else "codex")
+
+
+def resolve_binary():
+    preferred = os.environ.get("HSTACK_CODEX_BINARY") or shutil.which("codex")
+    if preferred:
+        return preferred
+    prefix = Path(os.environ.get("HSTACK_CODEX_PREFIX", "~/.local/share/hstack-codex")).expanduser()
+    installed = prefix / "node_modules/.bin/codex"
+    if installed.is_file() and os.access(installed, os.X_OK):
+        return str(installed)
+    app = Path("/Applications/ChatGPT.app/Contents/Resources/codex")
+    return str(app) if app.exists() else "codex"
+
+
+BINARY = resolve_binary()
 ACTIVE = {"starting", "running", "orphaned"}
 PUBLIC = ("id", "cwd", "model", "effort", "sandbox", "timeout_seconds", "status", "created_at", "finished_at", "exit_code", "error")
 

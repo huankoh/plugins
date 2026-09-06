@@ -6,6 +6,8 @@ hstack preserves upstream pstack's engineering workflows. The mappings below rep
 
 Resolve `/poteto-mode`, `/how`, and other bundled workflow references as sibling skills in this `hstack` plugin. Read their `SKILL.md` files from this plugin's `skills/` directory, not the separate `pstack-plugin` catalog edition. User invocation in Codex uses `$poteto-mode` or `$setup-pstack`. Relative links resolve from the file containing the link. Cursor's `mode`, `reminder`, and `.mdc` features do not exist here; continue the selected workflow within the current task without claiming a global sticky mode.
 
+The generated Codex package exposes `poteto-mode` and `setup-pstack` for native catalog selection. Other workflows preserve explicit invocation policy. When `poteto-mode` selects a playbook or leaf skill, read that sibling file directly even if the initial catalog omits it. Catalog visibility does not change tool permissions or make every workflow run automatically.
+
 ## Models and delegation
 
 Read `~/.codex/pstack-models.json` when first delegating in a task. If absent, use this plugin's `config/default-models.json`. Its `roles` object uses the exact upstream role labels. Missing roles fall back to the configured `default`, then `inherit-parent`, never to inline Cursor model slugs. `inherit-parent` and `auto` mean omit model and reasoning effort. A real selection is an object with `model` and optional `reasoning_effort`; verify both against the live subagent tool. Never use Cursor's combined model-effort identifiers.

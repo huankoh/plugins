@@ -54,7 +54,8 @@ def build(output):
                 if explicit:
                     policy = skill.parent / 'agents/openai.yaml'
                     policy.parent.mkdir(exist_ok=True)
-                    policy.write_text(yaml.safe_dump({'interface': {'display_name': metadata['name'], 'short_description': metadata['description'][:64]}, 'policy': {'allow_implicit_invocation': False}}, sort_keys=False))
+                    # Codex cloud omits explicit-only workflows from its initial catalog.
+                    policy.write_text(yaml.safe_dump({'interface': {'display_name': metadata['name'], 'short_description': metadata['description'][:64]}, 'policy': {'allow_implicit_invocation': metadata['name'] == 'poteto-mode'}}, sort_keys=False))
             preamble = f'Before following this workflow, read [the {runtime} runtime adapter](../../hybrid/runtime/{runtime}.md). It governs runtime-specific instructions throughout this package.\n\n'
             skill.write_text('---\n' + yaml.safe_dump(metadata, sort_keys=False, allow_unicode=True) + '---\n\n' + preamble + body)
         if runtime == 'codex':
