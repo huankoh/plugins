@@ -61,6 +61,17 @@ def check_task(task):
         raise ValueError('Checks must be nonempty argv arrays, not shell command strings')
 
 
+def runtime_identity():
+    package = Path(__file__).resolve().parent.parent
+    if (package / 'BUILD.json').exists():
+        identity = worker.read(package / 'BUILD.json')
+    else:
+        identity = {'source_revision': git(package, 'rev-parse', 'HEAD')}
+    identity['runner_sha256'] = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
+    identity['worker_sha256'] = hashlib.sha256(Path(worker.__file__).read_bytes()).hexdigest()
+    return identity
+
+
 def submit(args):
     task = json.load(sys.stdin) if args.task == '-' else worker.read(Path(args.task))
     check_task(task)
@@ -89,6 +100,7 @@ def submit(args):
         checkout = directory / 'checkout'
         job = dict(request, key=args.key, fingerprint=fingerprint, common_dir=common,
                    checkout=str(checkout), worker_id=hashlib.sha256((args.key + fingerprint).encode()).hexdigest()[:32], status='preparing', verification='pending', created_at=time.time())
+        job['pstack'] = runtime_identity()
         save(job)
         # The public record exists before the subprocess is started. An uncertain
         # handoff remains visible and cannot silently launch a duplicate.
@@ -193,6 +205,8 @@ def validate(key, head):
         raise ValueError('Job is not a passed independent review')
     if commit(job['repo'], head) != job['head']:
         raise ValueError('Review is stale: current head differs from reviewed head')
+    if git(job['repo'], 'status', '--porcelain'):
+        raise ValueError('Source checkout has uncommitted changes; this review covers the committed head only')
     return {'key': key, 'valid': True, 'reviewed_head': job['head']}
 
 

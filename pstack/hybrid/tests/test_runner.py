@@ -66,6 +66,7 @@ class RunnerTests(unittest.TestCase):
         self.assertEqual(result['verification'], 'passed')
         self.assertTrue(self.call('validate', 'review', '--head', self.base)['valid'])
         (self.repo / 'value.txt').write_text('changed\n')
+        self.assertIn('uncommitted', self.call('validate', 'review', '--head', self.base, success=False)['error'])
         self.git('commit', '-qam', 'later change')
         self.assertIn('stale', self.call('validate', 'review', '--head', 'HEAD', success=False)['error'])
 
