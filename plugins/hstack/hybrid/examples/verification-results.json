@@ -1,0 +1,62 @@
+{
+  "date": "2026-09-06",
+  "cli_version": "0.153.3",
+  "auth": "ChatGPT subscription",
+  "model_selection": "CLI default, no override",
+  "fixture": "ordinary addition, one deliberately failing unit test",
+  "jobs": [
+    {
+      "key": "live-rescue-v2",
+      "role": "rescue",
+      "base": "7e0c384b9006df7d22fcbe73082082641dd3cc87",
+      "head": "7e0c384b9006df7d22fcbe73082082641dd3cc87",
+      "status": "succeeded",
+      "verification": "passed",
+      "changed_paths": [
+        "math_utils.py"
+      ],
+      "report": {
+        "summary": "Changed only math_utils.py to use a + b. Reproduced the original failure, then verified python3 -m unittest -v passes (1 test). git diff --check passed. Changes remain uncommitted.",
+        "verdict": "pass",
+        "findings": []
+      },
+      "checks": [
+        {
+          "argv": [
+            "python3",
+            "-m",
+            "unittest",
+            "-v"
+          ],
+          "exit_code": 0
+        }
+      ]
+    },
+    {
+      "key": "live-review",
+      "role": "review",
+      "base": "7e0c384b9006df7d22fcbe73082082641dd3cc87",
+      "head": "91c4d587b9990cc135b17dbf60faa92b539e98de",
+      "status": "succeeded",
+      "verification": "passed",
+      "changed_paths": [],
+      "report": {
+        "summary": "Reviewed base 7e0c384 to head 91c4d58 under the adapter and verification instructions. The sole change correctly replaces subtraction with addition. The unit test verifies add(2, 3) == 5. `python3 -m unittest -v` passed (1 test; bytecode writes disabled). Checkout remains clean and unchanged.",
+        "verdict": "pass",
+        "findings": []
+      },
+      "checks": [
+        {
+          "argv": [
+            "python3",
+            "-m",
+            "unittest",
+            "-v"
+          ],
+          "exit_code": 0
+        }
+      ]
+    }
+  ],
+  "review_head_validated": "91c4d587b9990cc135b17dbf60faa92b539e98de"
+}

@@ -1,0 +1,4 @@
+{
+  "prompt": "Review the committed change for correctness, missing tests and unnecessary complexity. Return concrete blocking findings or an empty findings list when it passes.",
+  "checks": []
+}

@@ -1,0 +1,13 @@
+{
+  "name": "hstack",
+  "owner": {
+    "name": "huankoh"
+  },
+  "plugins": [
+    {
+      "name": "hstack",
+      "source": "./plugins/hstack",
+      "description": "hstack: pstack workflows with Codex review and rescue."
+    }
+  ]
+}

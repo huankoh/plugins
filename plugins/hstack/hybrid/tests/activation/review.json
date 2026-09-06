@@ -1,0 +1,4 @@
+{
+  "prompt": "Independently review the receipt summary change between the supplied base and head. Read README.md and tests/test_receipts.py. Confirm refunds decrease net receipts, full refunds leave zero, cents remain exact, and void or empty ledgers have no settled receipts. Drive the real CLI and run the supplied check. Do not modify project files. Put only unresolved blocking findings in findings; observations belong in summary.",
+  "checks": [["python3", "-m", "unittest", "discover", "-s", "tests", "-v"]]
+}
