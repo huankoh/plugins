@@ -4,7 +4,7 @@ Validation date: 2026-09-06. Upstream baseline: `93b00b89ef425a9c1bac0d0b317dfc4
 
 ## Local checks
 
-- 15 Python package/runner/installer tests pass on macOS with Python 3.9. Tests use an explicit CLI double for failure, cancellation, timeouts, duplicate keys, interrupted records, checkout ownership, patch collection and stale-review rejection. Installer tests cover repeat/update Git fetches, preservation of local changes, and failed-copy recovery.
+- 32 Python package/runner/installer/auth-bootstrap tests pass on macOS with Python 3.9. Tests use an explicit CLI double for failure, cancellation, timeouts, duplicate keys, interrupted records, checkout ownership, patch collection and stale-review rejection. Installer tests cover repeat/update Git fetches, preservation of local changes, and failed-copy recovery. Auth tests cover private permissions, symlink and repository-path refusal, atomic concurrent restoration, preservation of refreshed credentials, and removal of the seed from real supervisor, Git and acceptance-check processes.
 - Both generated packages preserve all 45 skills and 18 inherited role defaults. Codex entrypoint discovery and its invocation-policy adjustment are recorded below.
 - Generated Codex package passes the native plugin-creator validator. Native app-server discovery found all 45 namespaced skills with no errors in a disposable workspace; `plugin/read` resolved the generated marketplace/package without installation.
 - Existing pstack orchestration/watch-pr tests: 52 pass, 0 fail, with Bun 1.3.10. Existing strict TypeScript check passes.
@@ -103,7 +103,7 @@ The `hstack` GitHub Actions job runs package/runner tests, upstream tests/typech
 
 An initial Cursor cloud VM installed Codex CLI, staged hstack and passed all four
 receipt-fixture tests. The reusable **hstack activation** environment
-`b0780509-a9dd-11f1-b532-320a589b8025` now has completed Build
+`b0780509-a9dd-11f1-b532-320a589b8025` initially completed Build
 `bld-20260906-d9b92096-8562-458c-81c1-4921040093d3`.
 
 A [fresh cloud task](https://cursor.com/agents/bc-bdcfc8e2-6f11-4f67-a29d-db8c9533df60)
@@ -115,10 +115,46 @@ catalog exposed only upstream pstack setup from `cursor-public/9717366` at
 `7314f723a487ec406b6369fe5865ba034cfed166`; hstack was not natively discovered.
 The task explicitly loaded staged poteto-mode and its Cursor adapter.
 
-Saved-Build reuse, package staging and binary readiness are verified. Codex
-authentication was unavailable in the fresh VM, and nested review awaits the
-user's new authentication approval. Neither native hstack cloud discovery nor
-authenticated nested execution is claimed as passed.
+Saved-Build reuse, package staging and binary readiness were verified before
+authentication. The user then authorized device login in that VM. The doctor
+reported `auth: chatgpt` and `ready: true`, and a real nested review passed.
+Handoff `hstack-activation-review-20260906`, worker
+`36e19476b378cd8cf509213ae37ffb20`, reviewed fixture commit
+`c4fa19a3b5dd7ea88f31d391b6fb9a9ce1656ead`. Codex returned `pass` with no
+findings, the parent ran all four acceptance tests successfully, source snapshots
+matched, and current-HEAD validation passed. No credential-bearing Build was made.
+Native hstack cloud discovery remains unresolved.
+
+Commit `1447b237746e9ea58525a3b3209b5e8a4c5f20b1` adds runtime-secret bootstrap
+and isolated auth-home selection. Its [CI run](https://github.com/huankoh/plugins/actions/runs/34033410467)
+passed. Cold restore and repeat preservation also passed with a test CLI; these
+checks do not themselves establish server authentication. The documented static
+seed does not provide credential write-back or exclusive ownership across VMs.
+
+A [fresh unattended-authentication task](https://cursor.com/agents/bc-9e37244a-77fc-48b9-b18c-858f26295c2b)
+then booted from the environment's new active Build
+`bld-20260906-56da8234-7e35-41b0-b5b2-1f221b191274`, with source
+`1447b237746e9ea58525a3b3209b5e8a4c5f20b1` and fingerprint
+`aa26de2dc500267b3cee8f047f5cee045f634f0268eb0b4e342ac99186e0c0f0`.
+The runtime Start restored `HSTACK_CODEX_AUTH_JSON`, saved as an Environment
+Runtime Secret, into the private auth cache. The auth file was mode `0600`; doctor
+reported `auth: chatgpt` and `ready: true` before any manual login or restoration.
+No manually exported `CODEX_HOME` or binary override, API-key fallback, or model
+override was used.
+
+Native poteto-mode remained absent, so the task explicitly loaded the staged
+skill and Cursor adapter. It reproduced three failures, fixed the fixture, and
+submitted handoff `hstack-unattended-auth-20260906`, worker
+`f49fe65a58b411338f4d776dece3b136`. Codex reviewed HEAD
+`f2d1218c2aec99c7f7f799eb2355407a9df44364` and returned `pass` with no findings.
+The parent passed all four acceptance tests; the source snapshot was unchanged,
+the fixture and connected repository stayed clean, and current-HEAD validation
+returned true. This verifies server authentication after automatic secret startup
+on one fresh VM. It does not establish repeated or concurrent fresh-VM token
+renewal. The refreshed cache remains on that VM, and no authenticated snapshot
+was created. See the [sanitized observed-UI evidence](../examples/cursor-cloud-runtime-secret-verification.json).
+The environment remains pinned to the tested runtime commit; later evidence-only
+documentation commits do not require a new Build.
 
 A GitHub marketplace experiment published the identical tested package on fork
 branch `hstack-cursor` at `0033863ff097f08068f06c73338721715bfeec3e`. Cursor's

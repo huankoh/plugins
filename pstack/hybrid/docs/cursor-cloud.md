@@ -11,7 +11,7 @@ Configure a personal cloud environment named hstack activation for huankoh/plugi
 Leave the connected task repository and model settings unchanged.
 
 Use https://github.com/huankoh/plugins.git at exact commit
-e35ef95c149bd2a45776779a11da7e0f68366a2c. Fetch it into ~/hstack-bootstrap,
+1447b237746e9ea58525a3b3209b5e8a4c5f20b1. Fetch it into ~/hstack-bootstrap,
 outside the task repository, and verify HEAD before building. Preserve any
 existing unrelated checkout instead of replacing it.
 
@@ -28,6 +28,10 @@ occupies that path, report the conflict instead of overwriting it.
 Run pstack/hybrid/install-codex.sh and pstack/hybrid/check-codex.sh from the
 pinned checkout. Verify codex-cli 0.153.3 at the private installer prefix.
 Read the staged BUILD.json and report its source revision and fingerprint.
+
+Set the runtime Start command to:
+bash "$HOME/hstack-bootstrap/pstack/hybrid/start-cursor.sh"
+Run this only when a task VM boots, never during Build Install.
 
 Save the repeatable preparation in this personal environment and complete a
 successful Build before any Codex login. Do not authenticate Codex or copy
@@ -47,37 +51,40 @@ The personal `hstack activation` environment for `huankoh/plugins` was saved thr
 
 | Recorded item | Value |
 |---|---|
-| Build ID | `bld-20260906-d9b92096-8562-458c-81c1-4921040093d3` |
-| Source revision | `e35ef95c149bd2a45776779a11da7e0f68366a2c` |
-| Source fingerprint | `8caa1fe2cf724fc196bc79c104fb83a1b773d7e9f8ec11f0dac37bf055074964` |
+| Environment ID | `b0780509-a9dd-11f1-b532-320a589b8025` |
+| Build ID | `bld-20260906-56da8234-7e35-41b0-b5b2-1f221b191274` |
+| Source revision | `1447b237746e9ea58525a3b3209b5e8a4c5f20b1` |
+| Source fingerprint | `aa26de2dc500267b3cee8f047f5cee045f634f0268eb0b4e342ac99186e0c0f0` |
 | Bootstrap checkout | `~/hstack-bootstrap` |
 | Staged Cursor package | `~/.cursor/plugins/local/hstack` |
 | Codex CLI | `0.153.3`, installed without credentials |
 
-The cloud receipt fixture passed all four acceptance tests through explicit hstack file loading. A [fresh agent in the correctly selected environment](https://cursor.com/agents/bc-bdcfc8e2-6f11-4f67-a29d-db8c9533df60) confirmed the same Build, complete pinned package, matching fingerprint, and Codex CLI 0.153.3. The runner found the private installer prefix without an exported binary path. Authentication was unavailable, as expected for a Build without credentials.
+An earlier [fresh agent in the correctly selected environment](https://cursor.com/agents/bc-bdcfc8e2-6f11-4f67-a29d-db8c9533df60) confirmed Build `bld-20260906-d9b92096-8562-458c-81c1-4921040093d3`, source `e35ef95c149bd2a45776779a11da7e0f68366a2c`, its matching fingerprint, and Codex CLI 0.153.3. The runner found the private installer prefix without an exported binary path. Authentication was initially unavailable. The receipt fixture passed all four acceptance tests through explicit hstack file loading.
 
 That fresh agent did not discover hstack natively. Its initial catalog contained only upstream pstack's `setup-pstack` from the `cursor-public` cache, not hstack's skills. The agent explicitly loaded the staged `poteto-mode` and Cursor runtime adapter. Native cloud plugin registration has not been achieved despite the separate local Cursor plugin installation.
 
 A subsequent device login in that VM enabled a real Codex review. Handoff `hstack-activation-review-20260906`, worker `36e19476b378cd8cf509213ae37ffb20`, reviewed fixture commit `c4fa19a3b5dd7ea88f31d391b6fb9a9ce1656ead`. Codex returned `pass` with no findings, the parent runner passed all four tests, source preservation passed, and HEAD validation returned true. This verifies subscription-authenticated nested execution after device login, separately from secret-based startup.
 
+A [fresh unattended-authentication task](https://cursor.com/agents/bc-9e37244a-77fc-48b9-b18c-858f26295c2b) used the current Build in the table above. Its runtime Start restored the Environment Runtime Secret before the agent ran. Doctor reported `auth: chatgpt` and `ready: true` without manual login, restoration, or exported `CODEX_HOME` or binary overrides. The real Codex review passed with no findings; all four parent acceptance tests, source preservation, and current-HEAD validation passed. Native poteto-mode was still absent, so this run explicitly loaded the staged skill and Cursor adapter. See the [sanitized evidence](../examples/cursor-cloud-runtime-secret-verification.json).
+
 When starting a task, select the named `hstack activation` environment in the repository/environment picker. Selecting plain `plugins` or `huankoh/plugins` can select a different saved environment. Confirm the environment name and Build on the new task before testing. The pinned bootstrap is independent of the task branch, so selecting `main` also tests that separation.
 
 One fresh probe selected plain `plugins` and used the older `Personal Environment huankoh/plugins`, whose UI showed no install script. That task lacked both the package and Codex CLI. This result identifies the wrong environment selection; it does not establish a failure of the saved hstack Build.
 
-After explicitly selecting `hstack activation`, start two fresh agents and have each run:
+After explicitly selecting `hstack activation`, start one fresh agent for the dedicated Runtime Secret trial and run:
 
 ```bash
 bash "$HOME/hstack-bootstrap/pstack/hybrid/check-codex.sh"
 python3 "$HOME/hstack-bootstrap/pstack/hybrid/runner.py" doctor
 ```
 
-Both must report the pinned CLI version and the actual authentication state. Ask each agent to record whether hstack's `poteto-mode` appears in its native skill catalog before reading staged files. Verify the staged `BUILD.json` matches the selected revision. Existing agents or explicitly selected older Builds are not covered by this check.
+The agent must report the pinned CLI version and the actual authentication state. Record whether hstack's `poteto-mode` appears in its native skill catalog before reading staged files. Verify the staged `BUILD.json` matches the selected revision. Existing agents or explicitly selected older Builds are not covered by this check. Repeated Build-reuse probes must be credential-free or use separately provisioned sessions; do not start multiple VMs with the same static login seed.
 
 If native discovery is unavailable, explicitly read `~/.cursor/plugins/local/hstack/skills/poteto-mode/SKILL.md` and its `hybrid/runtime/cursor.md` adapter to exercise the workflow. Record that activation method. Staging the full package preserves relative links but does not prove native plugin registration.
 
 ## Authenticate at runtime
 
-The Build contains the executable, not a subscription login. Inside the VM where Codex will actually run:
+The Build contains the executable, not a subscription login. Runtime Secret startup is described below. For a separate manual-login setup, sign in inside the VM where Codex will actually run:
 
 ```bash
 "$HOME/.local/share/hstack-codex/node_modules/.bin/codex" login --device-auth
@@ -116,11 +123,11 @@ Before the VM ends, collect the report, patch and verification logs through the 
 
 - Missing/wrong CLI: check the Build succeeded, is active, and contains the expected scripts. Run the startup checker.
 - Missing hstack: confirm the task selected `hstack activation`, then inspect the staged package and Build. A local Cursor marketplace installation does not establish cloud installation. Distinguish missing files from unavailable native discovery.
-- Authentication failure: run device login in the current VM, not on your Mac.
+- Authentication failure: inspect sanitized startup output and doctor status first. During an unattended-authentication test, stop and report the failure before attempting manual login. For a separate manual-login setup, run device login in the current VM.
 - Download/API failure: inspect the effective outbound network policy. npm package downloads and Codex authentication/API endpoints must be reachable. Preserve existing policy rather than disabling controls. [Cursor secrets and networking](https://cursor.com/docs/cloud-agent/security-network).
 - Worker interrupted: inspect its recorded key and collect artifacts before retrying. A success message without a collected patch/report is incomplete.
 
-The install/start mechanism is documented. Actual nested Codex execution must be verified on your account's environment; it is not guaranteed merely because the binary is present.
+Runtime Secret startup and a real nested Codex review passed in the recorded environment. Verify other environments independently; the binary or cached login status alone does not establish server authentication.
 
 ## Remote marketplace import probe
 
