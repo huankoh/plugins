@@ -1,0 +1,4 @@
+{
+  "prompt": "Fix only the failure described by the coordinator. Inspect the checkpoint diff first, preserve useful partial work, and leave the fix uncommitted for patch collection. If failure evidence is missing, return blocked.",
+  "checks": []
+}

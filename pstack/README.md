@@ -255,3 +255,7 @@ to set it up, point cursor at [`FOR_AGENTS.md`](./automations/benny/FOR_AGENTS.m
 ## license
 
 MIT
+
+## Cursor and Codex hybrid adaptation
+
+This fork adds an opt-in [hybrid distribution](hybrid/README.md) with generated Cursor/Codex packages, a Codex review/rescue runner, and setup guides for local Cursor, Grok Bot and Cursor cloud VMs. Canonical upstream skills remain unchanged; runtime-specific instructions are added during packaging.
