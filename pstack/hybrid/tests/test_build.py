@@ -51,7 +51,7 @@ class BuildTests(unittest.TestCase):
             self.assertEqual(entry['name'], 'hstack')
             cursor = output / 'cursor/plugins/hstack/skills/hstack-poteto-mode/SKILL.md'
             codex = output / 'codex/plugins/hstack/skills/hstack-poteto-mode/SKILL.md'
-            self.assertTrue(yaml.safe_load(cursor.read_text().split('---')[1])['disable-model-invocation'])
+            self.assertNotIn('disable-model-invocation', cursor.read_text().split('---')[1])
             self.assertNotIn('disable-model-invocation', codex.read_text().split('---')[1])
             policy = yaml.safe_load((codex.parent / 'agents/openai.yaml').read_text())
             self.assertTrue(policy['policy']['allow_implicit_invocation'])
@@ -79,6 +79,38 @@ class BuildTests(unittest.TestCase):
                     for address in re.findall(r'\]\(([^\s)]+)\)', page.read_text()):
                         if 'hybrid/runtime/' in address or address.endswith('SKILL-MAP.json'):
                             self.assertTrue((page.parent / address).resolve().is_file(), (page, address))
+
+    def test_entrypoints_are_discoverable_and_leaf_policies_remain_explicit(self):
+        canonical = {path: path.read_bytes() for path in (builder.SOURCE / 'skills').glob('*/SKILL.md')}
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / 'packages'
+            builder.build(output)
+            for runtime in ('cursor', 'codex'):
+                package = output / runtime / 'plugins/hstack'
+                implicit = set()
+                for source, contents in canonical.items():
+                    name = 'hstack-' + source.parent.name
+                    skill = package / 'skills' / name / 'SKILL.md'
+                    metadata = yaml.safe_load(skill.read_text().split('---')[1])
+                    if name == 'hstack-poteto-mode':
+                        self.assertNotIn('disable-model-invocation', metadata)
+                        self.assertNotIn('mode', metadata)
+                    if runtime == 'cursor':
+                        if not metadata.get('disable-model-invocation', False):
+                            implicit.add(name)
+                        if name != 'hstack-poteto-mode':
+                            original = yaml.safe_load(contents.decode().split('---')[1])
+                            for field in ('disable-model-invocation', 'mode'):
+                                self.assertEqual(metadata.get(field), original.get(field), (name, field))
+                    else:
+                        policy_file = skill.parent / 'agents/openai.yaml'
+                        policy = yaml.safe_load(policy_file.read_text()) if policy_file.exists() else {}
+                        if policy.get('policy', {}).get('allow_implicit_invocation', True):
+                            implicit.add(name)
+                self.assertEqual(implicit, {'hstack-poteto-mode', 'hstack-setup-pstack'}, runtime)
+                self.assertEqual(len(canonical) - len(implicit), 43)
+        for source, contents in canonical.items():
+            self.assertEqual(source.read_bytes(), contents, str(source))
 
     def test_namespacing_resolves_nested_links_and_preserves_source_urls(self):
         with tempfile.TemporaryDirectory() as directory:

@@ -123,6 +123,11 @@ def build(output):
             metadata['description'] = 'Within an explicitly selected hstack workflow. ' + metadata['description']
             if skill.parent.name == 'hstack-poteto-mode':
                 metadata['description'] = 'Run hstack engineering workflows when the user requests hstack or hstack-poteto-mode. Bare poteto-mode selects upstream pstack.'
+                if runtime == 'cursor':
+                    # Cloud discovery omits explicit-only mode skills. Keep the
+                    # uniquely scoped hstack entrypoint in the initial catalog.
+                    metadata.pop('disable-model-invocation', None)
+                    metadata.pop('mode', None)
             elif skill.parent.name == 'hstack-setup-pstack':
                 metadata['description'] = 'Configure hstack model roles when the user requests hstack setup or hstack-setup-pstack. Preserve existing model choices unless a change is requested.'
             if runtime == 'codex':
