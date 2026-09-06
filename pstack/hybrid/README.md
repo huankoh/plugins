@@ -2,6 +2,8 @@
 
 hstack adapts Lauren Tan's MIT-licensed [pstack](https://github.com/cursor/plugins/tree/main/pstack) for Cursor and Codex CLI/desktop, with a subscription-authenticated Codex review/rescue runner. It is maintained in [huankoh/plugins](https://github.com/huankoh/plugins) and is not an official Cursor or OpenAI release.
 
+Installable packages are published in [huankoh/hstack](https://github.com/huankoh/hstack). That repository puts the Cursor and Codex marketplace manifests on its default branch and records the source revision used for each publication. This fork remains the canonical source; [PR #1](https://github.com/huankoh/plugins/pull/1) shows the adaptation against upstream pstack.
+
 The canonical upstream skills remain in `pstack/skills`; the adaptation source stays in `pstack/hybrid` to keep upstream comparisons clear. `build.py` generates separate `hstack` packages with runtime-specific entry instructions and metadata. It does not install anything. The 18 model roles stay separate from execution backend selection. Existing model settings are preserved.
 
 ## Start here
