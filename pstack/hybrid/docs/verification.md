@@ -4,7 +4,7 @@ Validation date: 2026-09-06. Upstream baseline: `93b00b89ef425a9c1bac0d0b317dfc4
 
 ## Local checks
 
-- 12 Python package/runner tests pass on macOS with Python 3.9. Tests use an explicit CLI double for failure, cancellation, timeouts, duplicate keys, interrupted records, checkout ownership, patch collection and stale-review rejection.
+- 15 Python package/runner/installer tests pass on macOS with Python 3.9. Tests use an explicit CLI double for failure, cancellation, timeouts, duplicate keys, interrupted records, checkout ownership, patch collection and stale-review rejection. Installer tests cover repeat/update Git fetches, preservation of local changes, and failed-copy recovery.
 - Both generated packages preserve all 45 skills and 18 inherited role defaults. Codex entrypoint discovery and its invocation-policy adjustment are recorded below.
 - Generated Codex package passes the native plugin-creator validator. Native app-server discovery found all 45 namespaced skills with no errors in a disposable workspace; `plugin/read` resolved the generated marketplace/package without installation.
 - Existing pstack orchestration/watch-pr tests: 52 pass, 0 fail, with Bun 1.3.10. Existing strict TypeScript check passes.
@@ -18,7 +18,7 @@ The first live rescue returned completion notes as findings, so verification cor
 
 ## Cursor local activation
 
-The generated hstack plugin is installed in Cursor and exposes all 45 skills.
+The initial Cursor installation exposed all 45 generated hstack skills.
 A real Cursor task loaded hstack poteto-mode, reproduced the receipt fixture's
 three failures, fixed the application and committed
 `294d0108e6656dd47ff13c560ce1fc4d219691d6` from baseline
@@ -37,6 +37,33 @@ The runner and an independent host check each passed all four acceptance tests.
 Source snapshots matched before and after, the checkout remained clean, and
 `validate --head HEAD` accepted the current commit. Both attempt records were
 retained; a successful process alone was not treated as successful verification.
+
+A later UI recheck found a Git-fetch error when importing the generated folder.
+The local installer now publishes a stable Git marketplace and preserves prior
+commits for Cursor's cached fetches. It stages both incoming trees before touching
+an installation; a regression proves failed copies preserve the old checkout and
+allow retry. The stable marketplace commit
+`0033863ff097f08068f06c73338721715bfeec3e` was installed through Cursor's native UI,
+with the temporary development symlink removed.
+
+The fresh h3 task recorded the catalog before searching files. Only hstack's
+`setup-pstack` had a native skill `fullPath`; the installation overlay listed all
+45 skill names and two agents. Poteto-mode was explicitly read from the installed
+native cache. Thus registered plugin/cache activation is verified, while this
+run does not establish a native catalog path for every workflow.
+
+The cached runner launched Codex job `da97c1c991a9f1258e59bc0e59aee77e` using
+package source `e35ef95c149bd2a45776779a11da7e0f68366a2c`. Seven read-only
+scenarios plus the sample CLI passed, the review returned `pass` with no findings,
+and the runner and independent host each passed all four tests. The original
+checkout remained unchanged and clean; the review patch was empty and
+`validate --head HEAD` passed for the same fixture commit.
+
+Cursor's cache omits some source assets. Core poteto-mode/review dependencies are
+present. Benny setup from that cache lacks templates and setup/reproduction files;
+the Codex Comment Sicko translation also expects an omitted agent source file.
+The full managed marketplace retains these assets. Native Cursor's two registered
+agents are separate from that Codex file-reading path.
 
 ## Codex cloud activation
 
@@ -59,14 +86,39 @@ policy. Build checks confirm exactly those two implicit entries, preserve the
 other 43 explicit-only policies, and pass the native plugin validator. Canonical
 Cursor skills remain unchanged.
 
+A [committed-package cloud run](https://chatgpt.com/codex/cloud/tasks/task_e_6a9d45f216908327a5dc396b7ea51a80)
+used `e35ef95c149bd2a45776779a11da7e0f68366a2c` with the durable entrypoint
+policy. Its initial native catalog exposed `hstack:poteto-mode` and
+`hstack:setup-pstack`. It repaired the same baseline fixture at
+`e7248c997954954a2e439d624665e98846768ba7`; all four tests passed, sample net
+was 17.95, and both the fixture and connected project remained clean. This task
+exposed follow-up/wait operations but no native spawn operation, so independent
+review was **unverified in this run**. The earlier tasks' successful delegate
+reviews remain separate evidence. Native collaboration availability varied by
+task and must be checked at runtime.
+
 ## Linux and host validation
 
 The `hstack` GitHub Actions job runs package/runner tests, upstream tests/typecheck, and a clean Ubuntu CLI installation/version check twice without credentials. The [first clean Ubuntu run](https://github.com/huankoh/plugins/actions/runs/34019930483), under the previous `pstack hybrid` job name, passed every step, including both CLI installation invocations. Subsequent PR checks validate later changes.
 
-An actual Cursor cloud VM installed Codex CLI, staged hstack and passed all four
-receipt-fixture tests. Cloud authentication and completion of the reusable Build
-remain pending; an authenticated nested Codex review there has not yet passed.
-Binary preinstallation alone is not authenticated nested execution.
+An initial Cursor cloud VM installed Codex CLI, staged hstack and passed all four
+receipt-fixture tests. The reusable **hstack activation** environment
+`b0780509-a9dd-11f1-b532-320a589b8025` now has completed Build
+`bld-20260906-d9b92096-8562-458c-81c1-4921040093d3`.
+
+A [fresh cloud task](https://cursor.com/agents/bc-bdcfc8e2-6f11-4f67-a29d-db8c9533df60)
+selected that environment and cold-booted from the saved Build. It verified staged
+source `e35ef95c149bd2a45776779a11da7e0f68366a2c`, fingerprint
+`8caa1fe2cf724fc196bc79c104fb83a1b773d7e9f8ec11f0dac37bf055074964`, and Codex CLI
+0.153.3 automatically resolved from the installer's private prefix. Its initial
+catalog exposed only upstream pstack setup from `cursor-public/9717366` at
+`7314f723a487ec406b6369fe5865ba034cfed166`; hstack was not natively discovered.
+The task explicitly loaded staged poteto-mode and its Cursor adapter.
+
+Saved-Build reuse, package staging and binary readiness are verified. Codex
+authentication was unavailable in the fresh VM, and nested review awaits the
+user's new authentication approval. Neither native hstack cloud discovery nor
+authenticated nested execution is claimed as passed.
 
 Grok Bot was not configured or tested during these activation checks. Its guide
 remains a deployment procedure awaiting live validation.
